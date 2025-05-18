@@ -1,4 +1,3 @@
-
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommand
 from telegram.ext import (
     ApplicationBuilder,
@@ -8,15 +7,14 @@ from telegram.ext import (
     CallbackQueryHandler,
     filters
 )
+
 import json
 import os
 import random
 import asyncio
-from datetime import datetime, timedelta
-from pytz import timezone
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-
-scheduler = AsyncIOScheduler()
+from datetime import datetime
+from pytz import timezone
 
 async def notificar_programacion(app):
     scheduler.add_job(
@@ -24,8 +22,35 @@ async def notificar_programacion(app):
         "cron",
         hour=18, minute=30, timezone="US/Eastern"  # Edita si necesitas otro horario
     )
-    scheduler.start()
 
+
+ # ✅ Publicación automática diaria con blacklist
+async def publicar_botonera_diaria(app):
+    print("⏰ Ejecutando publicación automática de botonera")
+    if not os.path.exists(CANAL_ARCHIVO):
+        print("⚠️ No se encontró el archivo de canales.")
+        return
+
+    with open(CANAL_ARCHIVO, "r", encoding="utf-8") as f:
+        canales = json.load(f)
+
+    if not canales:
+        print("⚠️ No hay canales para publicar.")
+        return
+
+AsyncIOScheduler(timezone=timezone("US/Eastern"))
+
+scheduler = AsyncIOScheduler()
+scheduler.add_job(
+    lambda: asyncio.create_task(publicar_botonera_diaria(app)),
+    trigger="cron",
+    hour=18,
+    minute=30,
+    id="botonera_diaria",
+    replace_existing=True
+)
+
+scheduler.start()
 # === Blacklist ===
 BLACKLIST_FILE = "blacklist.json"
 
@@ -46,20 +71,6 @@ def limpiar_blacklist():
     if len(lista) != len(lista_nueva):
         guardar_blacklist(lista_nueva)
 
-# === Scheduler para publicar botonera automáticamente todos los días a las 6:30 PM (hora de Florida) ===
-scheduler = AsyncIOScheduler(timezone=timezone("US/Eastern"))
-
-scheduler.add_job(
-    lambda: asyncio.create_task(publicar_botonera_diaria(app)),
-    trigger="cron",
-    hour=18,
-    minute=30,
-    id="botonera_diaria",
-    replace_existing=True
-)
-
-scheduler.start()
-
 # === CONFIGURACIÓN ===
 TOKEN = "1977028208:AAHpkAqAx78Ph5zErJWVfb9Y0wHMwNT9kzs"
 ADMIN_IDS = [5383019921, 1401557612]
@@ -76,7 +87,7 @@ for job in scheduler.get_jobs():
 
 # ✅ Notificar a admins vía Telegram la hora programada
 async def notificar_programacion(app):
-    print("⚙️ Ejecutando función notificar_programacion")  # <-- AÑADE ESTO
+    print("⚙️ Ejecutando función notificar_programacion")
 
     for job in scheduler.get_jobs():
         hora = job.next_run_time.strftime("%Y-%m-%d %H:%M:%S %Z")
@@ -742,7 +753,7 @@ async def reenviado_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # === SETUP FINAL ===
 
 print("Bot funcionando correctamente")
-app = ApplicationBuilder().token(TOKEN).build()
+app = ApplicationBuilder().token("1977028208:AAHpkAqAx78Ph5zErJWVfb9Y0wHMwNT9kzs").drop_pending_updates(True).build()
 
 # ✅ Configuraciones iniciales
 app.add_error_handler(error_handler)
@@ -914,22 +925,8 @@ app.add_handler(MessageHandler(filters.FORWARDED & filters.ChatType.PRIVATE, ree
 
 mensajes_publicados = []
 
-# ✅ Publicación automática diaria con blacklist
-async def publicar_botonera_diaria(app):
-    print("⏰ Ejecutando publicación automática de botonera")
-
-    if not os.path.exists(CANAL_ARCHIVO):
-        print("⚠️ No se encontró el archivo de canales.")
-        return
-
-    with open(CANAL_ARCHIVO, "r", encoding="utf-8") as f:
-        canales = json.load(f)
-
-    if not canales:
-        print("⚠️ No hay canales para publicar.")
-        return
-
-    # Cargar encabezado y botones
+# ✅ Función para cargar encabezado y botones
+async def botonera(app):
     encabezado = obtener_encabezado()
     botones = [[InlineKeyboardButton(c["nombre"], url=c["enlace"])] for c in canales]
     teclado = InlineKeyboardMarkup(botones)
@@ -939,6 +936,33 @@ async def publicar_botonera_diaria(app):
 
     for canal in canales:
         canal_id = canal.get("id")
+
+        # Excluir canales fijos
+        if canal_id and canal_id not in [-1002050701908, -1001920805141]:
+            try:
+                if encabezado.get("type") == "gif" and encabezado.get("file_id"):
+                    msg = await app.bot.send_animation(
+                        chat_id=canal_id,
+                        animation=encabezado["file_id"],
+                        caption=encabezado["caption"],
+                        reply_markup=teclado,
+                        parse_mode="Markdown"
+                    )
+                else:
+                    msg = await app.bot.send_message(
+                        chat_id=canal_id,
+                        text=encabezado.get("caption", "Sin contenido"),
+                        reply_markup=teclado,
+                        parse_mode="Markdown"
+                    )
+
+                mensajes_publicados.append((canal_id, msg.message_id))
+                print(f"✅ Publicado en canal {canal_id}")
+
+            except Exception as e:
+                motivo = str(e)
+                print(f"❌ Error en canal {canal_id}: {motivo}")
+                await manejar_canal_invalido(canal, app, motivo)
 
         # Excluir canales fijos
         if canal_id and canal_id not in [-1002050701908, -1001920805141]:
@@ -1110,4 +1134,4 @@ async def eliminar_botonera_despues():
             print(f"❌ No se pudo notificar la eliminación a admin {admin_id}: {e}")
 
 # ✅ Iniciar el bot
-app.run_polling()
+app.run_polling(drop_pending_updates=True)
