@@ -20,7 +20,7 @@ async def notificar_programacion(application):
     scheduler.add_job(
         lambda: asyncio.create_task(publicar_botonera_diaria(application)),
         "cron",
-        hour=18, minute=30, timezone="US/Eastern"  # Edita si necesitas otro horario
+        hour=18, minute=30, timezone="US/Eastern"
     )
 
 
