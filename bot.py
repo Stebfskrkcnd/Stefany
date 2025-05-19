@@ -753,7 +753,7 @@ async def reenviado_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # === SETUP FINAL ===
 
 print("Bot funcionando correctamente")
-application = ApplicationBuilder().token("1977028208:AAHpkAqAx78Ph5zErJWVfb9Y0wHMwNT9kzs").build(drop_pending_updates=True)
+application = ApplicationBuilder().token("1977028208:AAHpkAqAx78Ph5zErJWVfb9Y0wHMwNT9kzs").build
 
 # ✅ Configuraciones iniciales
 app.add_error_handler(error_handler)
