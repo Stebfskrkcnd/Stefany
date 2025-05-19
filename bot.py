@@ -762,7 +762,7 @@ async def post_init(app):
     await set_bot_commands(app)
     await notificar_programacion(app)
 
-app.post_init = post_init
+application.post_init = post_init
 # /editar_encabezado Texto nuevo
 async def editar_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
