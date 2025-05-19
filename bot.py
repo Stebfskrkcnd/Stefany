@@ -16,16 +16,16 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime
 from pytz import timezone
 
-async def notificar_programacion(app):
+async def notificar_programacion(application):
     scheduler.add_job(
-        lambda: asyncio.create_task(publicar_botonera_diaria(app)),
+        lambda: asyncio.create_task(publicar_botonera_diaria(application)),
         "cron",
         hour=18, minute=30, timezone="US/Eastern"  # Edita si necesitas otro horario
     )
 
 
  # ✅ Publicación automática diaria con blacklist
-async def publicar_botonera_diaria(app):
+async def publicar_botonera_diaria(application):
     print("⏰ Ejecutando publicación automática de botonera")
     if not os.path.exists(CANAL_ARCHIVO):
         print("⚠️ No se encontró el archivo de canales.")
@@ -42,7 +42,7 @@ AsyncIOScheduler(timezone=timezone("US/Eastern"))
 
 scheduler = AsyncIOScheduler()
 scheduler.add_job(
-    lambda: asyncio.create_task(publicar_botonera_diaria(app)),
+    lambda: asyncio.create_task(publicar_botonera_diaria(application)),
     trigger="cron",
     hour=18,
     minute=30,
@@ -86,14 +86,14 @@ for job in scheduler.get_jobs():
     print(f"⏳ Job '{job.id}' programado para: {job.next_run_time}")
 
 # ✅ Notificar a admins vía Telegram la hora programada
-async def notificar_programacion(app):
+async def notificar_programacion(application):
     print("⚙️ Ejecutando función notificar_programacion")
 
     for job in scheduler.get_jobs():
         hora = job.next_run_time.strftime("%Y-%m-%d %H:%M:%S %Z")
         for admin_id in ADMIN_IDS:
             try:
-                await app.bot.send_message(
+                await application.bot.send_message(
                     chat_id=admin_id,
                     text=f"⏰ Botonera programada para: *{hora}*",
                     parse_mode="Markdown"
@@ -525,7 +525,7 @@ async def botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         msg = await update.message.reply_text(encabezado, reply_markup=teclado)
 
-async def manejar_canal_invalido(canal, app, motivo):
+async def manejar_canal_invalido(canal, , motivo):
     canal_id = canal.get("id")
     nombre = canal.get("nombre")
 
@@ -554,7 +554,7 @@ async def manejar_canal_invalido(canal, app, motivo):
     # Notificar a los admins
     for admin_id in ADMIN_IDS:
         try:
-            await app.bot.send_message(
+            await application.bot.send_message(
                 chat_id=admin_id,
                 text=f"⚠️ Canal *{nombre}* (`{canal_id}`) fue eliminado de la botonera por:\n`{motivo}`\n\n"
                      f"Agregado a *blacklist* por 90 días.",
@@ -686,7 +686,7 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
     print("❌ ERROR DETECTADO:", context.error)
 
 # ✅ Establecer comandos del menú /
-async def set_bot_commands(app):
+async def set_bot_commands(application):
     comandos = [
         BotCommand("start", "Iniciar el bot"),
         BotCommand("autorizar", "Autoriza un usuario"),
@@ -700,7 +700,7 @@ async def set_bot_commands(app):
         BotCommand("estado", "Ver estado actual del bot"),
         BotCommand("ver_blacklist", "Ver canales bloqueados temporalmente")
     ]
-    await app.bot.set_my_commands(comandos)
+    await application.bot.set_my_commands(comandos)
 
 # ✅ Reenvío de mensaje desde canal → guarda ID, nombre y enlace
 async def reenviado_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -758,9 +758,9 @@ application = ApplicationBuilder().token("1977028208:AAHpkAqAx78Ph5zErJWVfb9Y0wH
 # ✅ Configuraciones iniciales
 application.add_error_handler(error_handler)
 
-async def post_init(app):
-    await set_bot_commands(app)
-    await notificar_programacion(app)
+async def post_init(application):
+    await set_bot_commands(application)
+    await notificar_programacion(application)
 
 application.post_init = post_init
 # /editar_encabezado Texto nuevo
@@ -894,40 +894,40 @@ async def ver_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"⚠️ Error en /ver_encabezado: {e}")
 
 # ✅ Callbacks
-app.add_handler(CallbackQueryHandler(callback_eliminar))
+application.add_handler(CallbackQueryHandler(callback_eliminar))
 
 # ✅ Reenvíos privados
-app.add_handler(MessageHandler(filters.FORWARDED & filters.ChatType.PRIVATE, reenviado_handler))
+application.add_handler(MessageHandler(filters.FORWARDED & filters.ChatType.PRIVATE, reenviado_handler))
 
 # ✅ Ejecutar notificación automática al iniciar el bot
-app.post_init = notificar_programacion
+application.post_init = notificar_programacion
 
 # ✅ Registro de comandos
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("autorizar", autorizar))
-app.add_handler(CommandHandler("revocar", revocar))
-app.add_handler(CommandHandler("listar_autorizados", listar_autorizados))
-app.add_handler(CommandHandler("agregar", agregar))
-app.add_handler(CommandHandler("eliminar", eliminar))
-app.add_handler(CommandHandler("botonera", botonera))
-app.add_handler(CommandHandler("test_botonera", test_botonera))
-app.add_handler(CommandHandler("editar_encabezado", editar_encabezado))
-app.add_handler(CommandHandler("ver_encabezado", ver_encabezado))
-app.add_handler(CommandHandler("borrar_botonera", borrar_botonera))
-app.add_handler(CommandHandler("fileid", fileid))
-app.add_handler(CommandHandler("estado", estado))
-app.add_handler(CommandHandler("ver_blacklist", ver_blacklist))
+application.add_handler(CommandHandler("start", start))
+application.add_handler(CommandHandler("autorizar", autorizar))
+application.add_handler(CommandHandler("revocar", revocar))
+application.add_handler(CommandHandler("listar_autorizados", listar_autorizados))
+application.add_handler(CommandHandler("agregar", agregar))
+application.add_handler(CommandHandler("eliminar", eliminar))
+application.add_handler(CommandHandler("botonera", botonera))
+application.add_handler(CommandHandler("test_botonera", test_botonera))
+application.add_handler(CommandHandler("editar_encabezado", editar_encabezado))
+application.add_handler(CommandHandler("ver_encabezado", ver_encabezado))
+application.add_handler(CommandHandler("borrar_botonera", borrar_botonera))
+application.add_handler(CommandHandler("fileid", fileid))
+application.add_handler(CommandHandler("estado", estado))
+application.add_handler(CommandHandler("ver_blacklist", ver_blacklist))
 
 # ✅ Callback para botones interactivos
-app.add_handler(CallbackQueryHandler(callback_eliminar))
+application.add_handler(CallbackQueryHandler(callback_eliminar))
 
 # ✅ Manejar reenvíos privados (para auto-agregado de canales)
-app.add_handler(MessageHandler(filters.FORWARDED & filters.ChatType.PRIVATE, reenviado_handler))
+application.add_handler(MessageHandler(filters.FORWARDED & filters.ChatType.PRIVATE, reenviado_handler))
 
 mensajes_publicados = []
 
 # ✅ Función para cargar encabezado y botones
-async def botonera(app):
+async def botonera(applicationp):
     encabezado = obtener_encabezado()
     botones = [[InlineKeyboardButton(c["nombre"], url=c["enlace"])] for c in canales]
     teclado = InlineKeyboardMarkup(botones)
@@ -942,7 +942,7 @@ async def botonera(app):
         if canal_id and canal_id not in [-1002050701908, -1001920805141]:
             try:
                 if encabezado.get("type") == "gif" and encabezado.get("file_id"):
-                    msg = await app.bot.send_animation(
+                    msg = await applicationp.bot.send_animation(
                         chat_id=canal_id,
                         animation=encabezado["file_id"],
                         caption=encabezado["caption"],
@@ -950,7 +950,7 @@ async def botonera(app):
                         parse_mode="Markdown"
                     )
                 else:
-                    msg = await app.bot.send_message(
+                    msg = await application.bot.send_message(
                         chat_id=canal_id,
                         text=encabezado.get("caption", "Sin contenido"),
                         reply_markup=teclado,
@@ -963,13 +963,13 @@ async def botonera(app):
             except Exception as e:
                 motivo = str(e)
                 print(f"❌ Error en canal {canal_id}: {motivo}")
-                await manejar_canal_invalido(canal, app, motivo)
+                await manejar_canal_invalido(canal, application, motivo)
 
         # Excluir canales fijos
         if canal_id and canal_id not in [-1002050701908, -1001920805141]:
             try:
                 if encabezado.get("type") == "gif" and encabezado.get("file_id"):
-                    msg = await app.bot.send_animation(
+                    msg = await application.bot.send_animation(
                         chat_id=canal_id,
                         animation=encabezado["file_id"],
                         caption=encabezado["caption"],
@@ -977,7 +977,7 @@ async def botonera(app):
                         parse_mode="Markdown"
                     )
                 else:
-                    msg = await app.bot.send_message(
+                    msg = await application.bot.send_message(
                         chat_id=canal_id,
                         text=encabezado.get("caption", encabezado),
                         reply_markup=teclado,
@@ -990,12 +990,12 @@ async def botonera(app):
             except Exception as e:
                 motivo = str(e)
                 print(f"❌ Error en canal {canal_id}: {motivo}")
-                await manejar_canal_invalido(canal, app, motivo)
+                await manejar_canal_invalido(canal, application, motivo)
 
     # Enviar resumen a admins
     for admin_id in ADMIN_IDS:
         try:
-            await app.bot.send_message(
+            await application.bot.send_message(
                 chat_id=admin_id,
                 text=f"📤 Botonera enviada a {len(mensajes_publicados)} canales.\nHora: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
             )
@@ -1008,7 +1008,7 @@ async def botonera(app):
 # ✅ Enviar resumen a los administradores
     for admin_id in ADMIN_IDS:
         try:
-            await app.bot.send_message(
+            await application.bot.send_message(
                 chat_id=admin_id,
                 text=f"✅ Botonera enviada a {len(mensajes_publicados)} canales.\n🕒 Hora: {datetime.now().strftime('%H:%M:%S')}",
             )
@@ -1047,7 +1047,7 @@ async def eliminar_botonera_despues():
 
     for chat_id, msg_id in mensajes_publicados:
         try:
-            await app.bot.delete_message(chat_id=chat_id, message_id=msg_id)
+            await application.bot.delete_message(chat_id=chat_id, message_id=msg_id)
             exitosos += 1
             print(f"🗑️ Mensaje eliminado en canal {chat_id}")
         except Exception as e:
@@ -1057,7 +1057,7 @@ async def eliminar_botonera_despues():
     # Notificación final
     for admin_id in ADMIN_IDS:
         try:
-            await app.bot.send_message(
+            await application.bot.send_message(
                 chat_id=admin_id,
                 text=f"🧹 Botonera eliminada.\n✅ {exitosos} mensajes eliminados\n❌ {fallos} fallos"
             )
@@ -1072,7 +1072,7 @@ async def eliminar_botonera_despues():
 
     for chat_id, msg_id in mensajes_publicados:
         try:
-            await app.bot.delete_message(chat_id=chat_id, message_id=msg_id)
+            await application.bot.delete_message(chat_id=chat_id, message_id=msg_id)
             print(f"🗑️ Mensaje eliminado en canal {chat_id}")
             exitosos += 1
         except Exception as e:
@@ -1101,7 +1101,7 @@ async def eliminar_botonera_despues():
             ]
             castigar = any(m in motivo.lower() for m in motivos_castigables)
             if castigar and canal:
-                await manejar_canal_invalido(canal, app, motivo)
+                await manejar_canal_invalido(canal, application, motivo)
 
     # ✅ Notificar a los administradores
     from datetime import datetime
@@ -1125,7 +1125,7 @@ async def eliminar_botonera_despues():
 
     for admin_id in ADMIN_IDS:
         try:
-            await app.bot.send_message(
+            await application.bot.send_message(
                 chat_id=admin_id,
                 text=mensaje,
                 parse_mode="Markdown",
