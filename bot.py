@@ -38,14 +38,20 @@ async def publicar_botonera_diaria(application):
         print("⚠️ No hay canales para publicar.")
         return
 
+    print("📢 Publicando en los canales...")
+
+    for canal in canales:
+        print(f"✅ Publicado en canal: {canal.get('nombre', 'Sin nombre')}")
+
 AsyncIOScheduler(timezone=timezone("US/Eastern"))
 
 scheduler = AsyncIOScheduler()
 scheduler.add_job(
-    lambda: asyncio.create_task(publicar_botonera_diaria(application)),
+    publicar_botonera_diaria,
     trigger="cron",
-    hour=18,
-    minute=30,
+    hour=18, minute=30,
+    timezone="US/Eastern",
+    args=[application],
     id="botonera_diaria",
     replace_existing=True
 )
