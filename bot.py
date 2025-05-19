@@ -525,7 +525,7 @@ async def botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         msg = await update.message.reply_text(encabezado, reply_markup=teclado)
 
-async def manejar_canal_invalido(canal, , motivo):
+async def manejar_canal_invalido(canal, application, motivo):
     canal_id = canal.get("id")
     nombre = canal.get("nombre")
 
