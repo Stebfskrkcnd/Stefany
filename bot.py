@@ -756,7 +756,8 @@ print("Bot funcionando correctamente")
 application = ApplicationBuilder().token("1977028208:AAHpkAqAx78Ph5zErJWVfb9Y0wHMwNT9kzs").build
 
 # ✅ Configuraciones iniciales
-app.add_error_handler(error_handler)
+application.add_error_handler(error_handler)
+
 async def post_init(app):
     await set_bot_commands(app)
     await notificar_programacion(app)
