@@ -1135,4 +1135,4 @@ async def eliminar_botonera_despues():
             print(f"❌ No se pudo notificar la eliminación a admin {admin_id}: {e}")
 
 # ✅ Iniciar el bot
-app.run_polling(drop_pending_updates=True)
+application.run_polling()
