@@ -140,13 +140,30 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("✅ Botonera publicada correctamente.")
 
-                # Guardar mensaje para eliminarlo luego
-                mensajes_publicados.append({
-                    "chat_id": canal["id"],
-                    "message_id": msg.message_id
-                })
-            except Exception as e:
-                print(f"❌ Error al publicar en {canal['nombre']}: {e}")
+                try:
+    print(f"➡️ Publicando en canal: {canal['nombre']}")
+    msg = await context.bot.send_message(
+        chat_id=canal["id"],
+        animation=canal["gif"],
+        caption=canal["encabezado"],
+        reply_markup=InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton(c["nombre"], url=c["url"])
+                for c in canales
+                if c["id"] != canal["id"] and c.get("fijo") is not True
+            ]
+        ])
+    )
+
+    # Guardar mensaje para eliminarlo luego
+    mensajes_publicados.append({
+        "chat_id": canal["id"],
+        "message_id": msg.message_id
+    })
+
+except Exception as e:
+    print(f"❌ Error al publicar en {canal['nombre']}: {e}")
+
 
     # Guardar los mensajes en archivo
     with open("botonera.json", "w", encoding="utf-8") as f:
