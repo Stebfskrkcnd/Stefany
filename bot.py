@@ -116,51 +116,58 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("⚠️ No hay canales para publicar.")
         return
 
+    # Crear botonera dinámica (mismos botones para todos)
+    botones = []
     for canal in canales:
-        if not canal.get("fijo", False):  # Solo si NO es canal fijo
+        if not canal.get("fijo", False):  # Solo canales NO fijos
+            botones.append(
+                [InlineKeyboardButton(text=canal["nombre"], url=canal["enlace"])]
+            )
+
+    if not botones:
+        await update.message.reply_text("⚠️ No hay canales válidos para mostrar en la botonera.")
+        return
+
+    for canal in canales:
+        if not canal.get("fijo", False):  # Publicar solo en canales NO fijos
             try:
                 print(f"➡️ Publicando en canal: {canal['nombre']}")
                 await context.bot.send_message(
                     chat_id=canal["id"],
-                    text="Aquí va tu botonera ⬇️",  # Reemplaza este texto con el texto real
-                    reply_markup=InlineKeyboardMarkup([  # Ejemplo de botonera
-                        [InlineKeyboardButton("Canal A", url="https://t.me/CanalA")],
-                        [InlineKeyboardButton("Canal B", url="https://t.me/CanalB")]
-                    ])
+                    text="Aquí va tu botonera ⬇️",
+                    reply_markup=InlineKeyboardMarkup(botones)
                 )
             except Exception as e:
                 print(f"❌ Error al publicar en {canal['nombre']}: {e}")
 
     await update.message.reply_text("📬 Botonera publicada manualmente con éxito.")
 
+
 # /eliminar_botonera
 async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("🗑️ Comando /eliminar_botonera recibido")
 
-    if not os.path.exists(CANAL_ARCHIVO):
-        await update.message.reply_text("⚠️ No se encontró el archivo de canales.")
+    if not os.path.exists("botonera.json"):
+        await update.message.reply_text("⚠️ No se encontró el archivo de mensajes de botonera.")
         return
 
-    with open(CANAL_ARCHIVO, "r", encoding="utf-8") as f:
-        canales = json.load(f)
+    with open("botonera.json", "r", encoding="utf-8") as f:
+        mensajes = json.load(f)
 
-    if not canales:
-        await update.message.reply_text("⚠️ No hay canales para procesar.")
-        return
+    eliminados = 0
 
-    for canal in canales:
-        if not canal.get("fijo", False):
-            try:
-                print(f"⛔ Eliminando botonera de: {canal['nombre']}")
-                await context.bot.send_message(
-                    chat_id=canal["id"],
-                    text="⚠️ Esta botonera fue eliminada por incumplir las normas."
-                )
-                # Si guardas ID del mensaje puedes usar bot.delete_message(...)
-            except Exception as e:
-                print(f"❌ Error al eliminar en {canal['nombre']}: {e}")
+    for item in mensajes:
+        try:
+            await context.bot.delete_message(
+                chat_id=item["chat_id"],
+                message_id=item["message_id"]
+            )
+            print(f"✅ Mensaje eliminado en chat {item['chat_id']}")
+            eliminados += 1
+        except Exception as e:
+            print(f"❌ Error al eliminar mensaje en chat {item['chat_id']}: {e}")
 
-    await update.message.reply_text("✅ Botonera eliminada manualmente en los canales no fijos.")
+    await update.message.reply_text(f"✅ Se eliminaron {eliminados} botoneras de los canales.")
 
 # /listar_autorizados
 async def listar_autorizados(update: Update, context: ContextTypes.DEFAULT_TYPE):
