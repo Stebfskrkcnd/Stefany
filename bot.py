@@ -154,14 +154,15 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ])
     )
 
-     # Guardar mensaje para eliminarlo luego
+    # Guardar mensaje para eliminarlo luego
+try:
     mensajes_publicados.append({
         "chat_id": canal["id"],
         "message_id": msg.message_id
     })
-
 except Exception as e:
-    print(f"❌ Error al publicar en {canal.get('nombre', 'desconocido')}: {e}")
+    print(f"❌ Error al guardar mensaje publicado en {canal.get('nombre', 'desconocido')}: {e}")
+
 
 
     # Guardar los mensajes en archivo
