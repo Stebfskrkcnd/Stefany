@@ -169,13 +169,18 @@ except Exception as e:
     with open("botonera.json", "w", encoding="utf-8") as f:
         json.dump(mensajes_publicados, f, ensure_ascii=False, indent=2)
 
-    # Crear botonera dinámica (mismos botones para todos)
-    botones = []
-    for canal in canales:
-        if not canal.get("fijo", False):  # Solo canales NO fijos
-            botones.append(
-                [InlineKeyboardButton(text=canal["nombre"], url=canal["enlace"])]
-            )
+# Crear botonera dinámica (mismos botones para todos)
+botones = []
+for canal in canales:
+    if not canal.get("fijo", False):  # Solo canales NO fijos
+        botones.append(
+            [InlineKeyboardButton(text=canal["nombre"], url=canal["enlace"])]
+        )
+
+# Verificar si hay botones válidos antes de continuar
+if not botones:
+    await update.message.reply_text("⚠️ No hay canales válidos para mostrar en la botonera.")
+    return
 
 for canal in canales:
     if not canal.get("fijo", False):  # Publicar solo en canales NO fijos
@@ -190,11 +195,10 @@ for canal in canales:
                 ])
             )
         except Exception as e:
-            print(f"❌ Error al publicar en {canal['nombre']}: {e}")
-    if not botones:
-        await update.message.reply_text("⚠️ No hay canales válidos para mostrar en la botonera.")
-        return
+            print(f"❌ Error al publicar en {canal.get('nombre', 'desconocido')}: {e}")
+
 await update.message.reply_text("📬 Botonera publicada manualmente con éxito.")
+
 
 # /eliminar_botonera
 async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
