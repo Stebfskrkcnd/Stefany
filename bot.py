@@ -827,6 +827,7 @@ application.add_handler(MessageHandler(filters.FORWARDED & filters.ChatType.PRIV
 application.add_handler(CommandHandler("start", start))
 application.add_handler(CommandHandler("publicar_botonera", publicar_botonera))
 application.add_handler(CommandHandler("eliminar_botonera", eliminar_botonera))
+application.add_handler(CommandHandler("estado", estado))
 application.add_handler(CommandHandler("agregar", agregar))
 application.add_handler(CommandHandler("eliminar", eliminar))
 application.add_handler(CommandHandler("autorizar", autorizar))
@@ -835,7 +836,6 @@ application.add_handler(CommandHandler("listar_autorizados", listar_autorizados)
 application.add_handler(CommandHandler("editar_encabezado", editar_encabezado))
 application.add_handler(CommandHandler("ver_encabezado", ver_encabezado))
 application.add_handler(CommandHandler("fileid", fileid))
-application.add_handler(CommandHandler("estado", estado))
 application.add_handler(CommandHandler("ver_blacklist", ver_blacklist))
 
 # ✅ Callback para botones interactivos
