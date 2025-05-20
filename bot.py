@@ -12,7 +12,6 @@ from handlers.callbacks import callback_handler
 async def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
-    # Handlers de comandos
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("estado", estado_bot))
     app.add_handler(CommandHandler("agregar", agregar_canal))
@@ -24,13 +23,19 @@ async def main():
     app.add_handler(CommandHandler("listar", listar_autorizados))
     app.add_handler(CommandHandler("encabezado", ver_encabezado))
     app.add_handler(CommandHandler("editar_encabezado", editar_encabezado))
-
-    # Handler para botones interactivos
     app.add_handler(CallbackQueryHandler(callback_handler))
 
     print("✅ Bot ejecutándose correctamente...")
     await app.run_polling()
 
+
+import asyncio
+import sys
+
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+    loop = asyncio.get_event_loop()
+    loop.create_task(main())
+    loop.run_forever()
