@@ -99,8 +99,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Hola, The Witch. El bot está listo para usarse.🔮")
 
 # /publicar_botonera
-    async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print("✅ Comando /publicarbotonera recibido")
+async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print("✅ Comando /publicar_botonera recibido")
     
     if not os.path.exists(CANAL_ARCHIVO):
         await update.message.reply_text("⚠️ No se encontró el archivo de canales.")
@@ -115,11 +115,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     for canal in canales:
         if not canal.get("fijo", False):  # Publicar solo en canales que NO son fijos
-            # Aquí va tu lógica para enviar la botonera a cada canal
             print(f"➡️ Publicando en canal: {canal['nombre']}")
             # await context.bot.send_message(chat_id=canal['id'], text="Aquí va tu botonera")
 
-    await update.message.reply_text("📬 Botonera publicada manualmente con exito.")
+    await update.message.reply_text("📬 Botonera publicada manualmente con éxito.")
 
 # /eliminar_botonera
 async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
