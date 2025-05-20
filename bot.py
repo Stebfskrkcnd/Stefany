@@ -166,23 +166,28 @@ except Exception as e:
     with open("botonera.json", "w", encoding="utf-8") as f:
         json.dump(mensajes_publicados, f, ensure_ascii=False, indent=2)
 
-# Crear botonera dinámica (mismos botones para todos)
-botones = []
-for canal in canales:
-    if not canal.get("fijo", False):  # Solo canales NO fijos
-        botones.append(
-            [InlineKeyboardButton(text=canal["nombre"], url=canal["enlace"])]
-        )
+    # Cargar canales desde archivo JSON
+with open('channels.json', 'r', encoding='utf-8') as f:
+    canales = json.load(f)
+
+# Crear botonera dinámica
+def crear_botonera_dinamica():
+    botones = []
+
+    # Filtrar solo canales que NO son fijos
+    canales_dinamicos = [c for c in canales if not c.get("fijo", False)]
+
+    # Mezclar el orden de los canales
+    random.shuffle(canales_dinamicos)
+
+    # Crear los botones (uno por fila)
+    for canal in canales_dinamicos:
+        botones.append([InlineKeyboardButton(text=canal["nombre"], url=canal["enlace"])])
+
+    return InlineKeyboardMarkup(botones)
 
 async def publicar_botonera(update, context):
-    # Crear botonera dinámica (mismos botones para todos)
-    botones = []
-    for canal in canales:
-        if not canal.get("fijo", False):  # Solo canales NO fijos
-            botones.append(
-                [InlineKeyboardButton(text=canal["nombre"], url=canal["enlace"])]
-            )
-
+   
     # Verificar si hay botones válidos antes de continuar
     if not botones:
         await update.message.reply_text("⚠️ No hay canales válidos para mostrar en la botonera.")
