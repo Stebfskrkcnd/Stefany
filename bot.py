@@ -8,10 +8,11 @@ from telegram.ext import (
     filters
 )
 
-import json
 import os
+import json
 import random
-import asyncio
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import ContextTypes
 from datetime import datetime
 from pytz import timezone
 
@@ -101,6 +102,24 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("Hola, The Witch. El bot está listo para usarse.🔮")
 
+CANAL_ARCHIVO = "channels.json"
+BOTONERA_ARCHIVO = "botonera.json"
+
+# Crear botonera dinámica
+def crear_botonera_dinamica(canales, canal_actual_id):
+    # Excluir el canal actual y los canales fijos
+    botones_candidatos = [
+        c for c in canales if c.get("fijo") is not True and c["id"] != canal_actual_id
+    ]
+
+    # Mezclar aleatoriamente
+    random.shuffle(botones_candidatos)
+
+    # Crear la estructura de botones (uno por fila)
+    botones = [[InlineKeyboardButton(c["nombre"], url=c["enlace"])] for c in botones_candidatos]
+
+    return InlineKeyboardMarkup(botones)
+
 # /publicar_botonera
 async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("✅ Comando /publicar_botonera recibido")
@@ -119,66 +138,31 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mensajes_publicados = []
 
     for canal in canales:
-        if canal.get("fijo") is not True:  # Excluir canales fijos de forma explícita
+        if canal.get("fijo") is not True:
             try:
                 print(f"➡️ Publicando en canal: {canal['nombre']}")
-                msg = await context.bot.send_message(
+                msg = await context.bot.send_animation(
                     chat_id=canal["id"],
                     animation=canal["gif"],
                     caption=canal["encabezado"],
-                    reply_markup=InlineKeyboardMarkup([
-                        [
-                            InlineKeyboardButton(c["nombre"], url=c["url"])
-                            for c in canales
-                            if c["id"] != canal["id"] and c.get("fijo") is not True
-                        ]
-                    ])
+                    reply_markup=crear_botonera_dinamica(canales, canal["id"])
                 )
-                mensajes_publicados.append(msg.message_id)
+
+                mensajes_publicados.append({
+                    "chat_id": canal["id"],
+                    "message_id": msg.message_id
+                })
+
             except Exception as e:
                 print(f"❌ Error publicando en canal {canal['nombre']}: {e}")
 
-    await update.message.reply_text("✅ Botonera publicada correctamente.")
-
-    print(f"➡️ Publicando en canal: {canal['nombre']}")
-    msg = await context.bot.send_message(
-        chat_id=canal["id"],
-        animation=canal["gif"],
-        caption=canal["encabezado"],
-        reply_markup=InlineKeyboardMarkup([
-            [
-                InlineKeyboardButton(c["nombre"], url=c["url"])
-                for c in canales
-                if c["id"] != canal["id"] and c.get("fijo") is not True
-            ]
-        ])
-    )
-
-    # Guardar mensaje para eliminarlo luego
-try:
-    mensajes_publicados.append({
-        "chat_id": canal["id"],
-        "message_id": msg.message_id
-    })
-except Exception as e:
-
-    # Guardar los mensajes en archivo
-    with open("botonera.json", "w", encoding="utf-8") as f:
-        json.dump(mensajes_publicados, f, ensure_ascii=False, indent=2)
-
-    # Cargar canales desde archivo JSON
-with open('channels.json', 'r', encoding='utf-8') as f:
-    canales = json.load(f)
-
-# Crear botonera dinámica
-def crear_botonera_dinamica():
-    botones = []
-
-    # Filtrar solo canales que NO son fijos
-    canales_dinamicos = [c for c in canales if not c.get("fijo", False)]
-
-    # Mezclar el orden de los canales
-    random.shuffle(canales_dinamicos)
+    # Guardar mensajes en archivo
+    try:
+        with open(BOTONERA_ARCHIVO, "w", encoding="utf-8") as f:
+            json.dump(mensajes_publicados, f, ensure_ascii=False, indent=2)
+        await update.message.reply_text("✅ Botonera publicada correctamente.")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Error al guardar mensajes: {e}")
 
     # Crear los botones (uno por fila)
     for canal in canales_dinamicos:
