@@ -1,4 +1,3 @@
-import asyncio
 from telegram.ext import (
     ApplicationBuilder, CommandHandler, CallbackQueryHandler
 )
@@ -10,33 +9,27 @@ from handlers.commands import (
 )
 from handlers.callbacks import callback_handler
 
-
-app = ApplicationBuilder().token(BOT_TOKEN).build()
-
-# Handlers de comandos
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("estado", estado_bot))
-app.add_handler(CommandHandler("agregar", agregar_canal))
-app.add_handler(CommandHandler("eliminar", eliminar_canal))
-app.add_handler(CommandHandler("publicar", publicar_botonera))
-app.add_handler(CommandHandler("borrar", eliminar_botonera))
-app.add_handler(CommandHandler("autorizar", autorizar))
-app.add_handler(CommandHandler("revocar", revocar))
-app.add_handler(CommandHandler("listar", listar_autorizados))
-app.add_handler(CommandHandler("encabezado", ver_encabezado))
-app.add_handler(CommandHandler("editar_encabezado", editar_encabezado))
-
-# Handler para botones interactivos
-app.add_handler(CallbackQueryHandler(callback_handler))
-
 async def main():
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
+
+    # Handlers de comandos
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("estado", estado_bot))
+    app.add_handler(CommandHandler("agregar", agregar_canal))
+    app.add_handler(CommandHandler("eliminar", eliminar_canal))
+    app.add_handler(CommandHandler("publicar", publicar_botonera))
+    app.add_handler(CommandHandler("borrar", eliminar_botonera))
+    app.add_handler(CommandHandler("autorizar", autorizar))
+    app.add_handler(CommandHandler("revocar", revocar))
+    app.add_handler(CommandHandler("listar", listar_autorizados))
+    app.add_handler(CommandHandler("encabezado", ver_encabezado))
+    app.add_handler(CommandHandler("editar_encabezado", editar_encabezado))
+
+    # Handler para botones interactivos
+    app.add_handler(CallbackQueryHandler(callback_handler))
+
     print("✅ Bot ejecutándose correctamente...")
-    await app.initialize()
-    await app.start()
-    await app.updater.start_polling()
-    await app.updater.wait_until_closed()
-    await app.stop()
-    await app.shutdown()
+    await app.run_polling()
 
 if __name__ == "__main__":
     import asyncio
