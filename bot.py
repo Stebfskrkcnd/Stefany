@@ -161,9 +161,6 @@ try:
         "message_id": msg.message_id
     })
 except Exception as e:
-    print(f"❌ Error al guardar mensaje publicado en {canal.get('nombre', 'desconocido')}: {e}")
-
-
 
     # Guardar los mensajes en archivo
     with open("botonera.json", "w", encoding="utf-8") as f:
