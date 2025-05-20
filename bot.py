@@ -177,28 +177,36 @@ for canal in canales:
             [InlineKeyboardButton(text=canal["nombre"], url=canal["enlace"])]
         )
 
-# Verificar si hay botones válidos antes de continuar
-if not botones:
-    await update.message.reply_text("⚠️ No hay canales válidos para mostrar en la botonera.")
-    return
-
-for canal in canales:
-    if not canal.get("fijo", False):  # Publicar solo en canales NO fijos
-        try:
-            print(f"➡️ Publicando en canal: {canal['nombre']}")
-            await context.bot.send_animation(
-                chat_id=canal["id"],
-                animation=canal["gif"],
-                caption=canal["encabezado"],
-                reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton(c["nombre"], url=c["url"])] for c in canales if c["id"] != canal["id"]
-                ])
+async def publicar_botonera(update, context):
+    # Crear botonera dinámica (mismos botones para todos)
+    botones = []
+    for canal in canales:
+        if not canal.get("fijo", False):  # Solo canales NO fijos
+            botones.append(
+                [InlineKeyboardButton(text=canal["nombre"], url=canal["enlace"])]
             )
-        except Exception as e:
-            print(f"❌ Error al publicar en {canal.get('nombre', 'desconocido')}: {e}")
+
+    # Verificar si hay botones válidos antes de continuar
+    if not botones:
+        await update.message.reply_text("⚠️ No hay canales válidos para mostrar en la botonera.")
+        return
+
+    for canal in canales:
+        if not canal.get("fijo", False):  # Publicar solo en canales NO fijos
+            try:
+                print(f"➡️ Publicando en canal: {canal['nombre']}")
+                await context.bot.send_animation(
+                    chat_id=canal["id"],
+                    animation=canal["gif"],
+                    caption=canal["encabezado"],
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton(c["nombre"], url=c["url"])] for c in canales if c["id"] != canal["id"]
+                    ])
+                )
+            except Exception as e:
+                print(f"❌ Error al publicar en {canal.get('nombre', 'desconocido')}: {e}")
 
     await update.message.reply_text("📬 Botonera publicada manualmente con éxito.")
-
 
 # /eliminar_botonera
 async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
