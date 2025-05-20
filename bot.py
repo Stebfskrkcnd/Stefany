@@ -116,6 +116,45 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("⚠️ No hay canales para publicar.")
         return
 
+    mensajes_publicados = []
+
+    for canal in canales:
+        if canal.get("fijo") is not True:  # Excluir canales fijos de forma explícita
+            try:
+                print(f"➡️ Publicando en canal: {canal['nombre']}")
+                msg = await context.bot.send_message(
+                    chat_id=canal["id"],
+                    animation=canal["gif"],
+                    caption=canal["encabezado"],
+                    reply_markup=InlineKeyboardMarkup([
+                        [
+                            InlineKeyboardButton(c["nombre"], url=c["url"])
+                            for c in canales
+                            if c["id"] != canal["id"] and c.get("fijo") is not True
+                        ]
+                    ])
+                )
+                mensajes_publicados.append(msg.message_id)
+            except Exception as e:
+                print(f"❌ Error publicando en canal {canal['nombre']}: {e}")
+
+    await update.message.reply_text("✅ Botonera publicada correctamente.")
+
+                # Guardar mensaje para eliminarlo luego
+                mensajes_publicados.append({
+                    "chat_id": canal["id"],
+                    "message_id": msg.message_id
+                })
+            except Exception as e:
+                print(f"❌ Error al publicar en {canal['nombre']}: {e}")
+
+    # Guardar los mensajes en archivo
+    with open("botonera.json", "w", encoding="utf-8") as f:
+        json.dump(mensajes_publicados, f, ensure_ascii=False, indent=2)
+
+    await update.message.reply_text("📬 Botonera publicada manualmente con éxito.")
+
+
     # Crear botonera dinámica (mismos botones para todos)
     botones = []
     for canal in canales:
@@ -128,20 +167,22 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("⚠️ No hay canales válidos para mostrar en la botonera.")
         return
 
-    for canal in canales:
-        if not canal.get("fijo", False):  # Publicar solo en canales NO fijos
-            try:
-                print(f"➡️ Publicando en canal: {canal['nombre']}")
-                await context.bot.send_message(
-                    chat_id=canal["id"],
-                    text="Aquí va tu botonera ⬇️",
-                    reply_markup=InlineKeyboardMarkup(botones)
-                )
-            except Exception as e:
-                print(f"❌ Error al publicar en {canal['nombre']}: {e}")
+for canal in canales:
+    if not canal.get("fijo", False):  # Publicar solo en canales NO fijos
+        try:
+            print(f"➡️ Publicando en canal: {canal['nombre']}")
+            await context.bot.send_animation(
+                chat_id=canal["id"],
+                animation=canal["gif"],
+                caption=canal["encabezado"],
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(c["nombre"], url=c["url"])] for c in canales if c["id"] != canal["id"]
+                ])
+            )
+        except Exception as e:
+            print(f"❌ Error al publicar en {canal['nombre']}: {e}")
 
-    await update.message.reply_text("📬 Botonera publicada manualmente con éxito.")
-
+await update.message.reply_text("📬 Botonera publicada manualmente con éxito.")
 
 # /eliminar_botonera
 async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -154,20 +195,21 @@ async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     with open("botonera.json", "r", encoding="utf-8") as f:
         mensajes = json.load(f)
 
-    eliminados = 0
+    errores = 0
 
-    for item in mensajes:
+    for mensaje in mensajes:
         try:
             await context.bot.delete_message(
-                chat_id=item["chat_id"],
-                message_id=item["message_id"]
+                chat_id=mensaje["chat_id"],
+                message_id=mensaje["message_id"]
             )
-            print(f"✅ Mensaje eliminado en chat {item['chat_id']}")
-            eliminados += 1
+            print(f"✅ Botonera eliminada en chat {mensaje['chat_id']}")
         except Exception as e:
-            print(f"❌ Error al eliminar mensaje en chat {item['chat_id']}: {e}")
+            errores += 1
+            print(f"❌ Error eliminando mensaje {mensaje['message_id']} en chat {mensaje['chat_id']}: {e}")
 
-    await update.message.reply_text(f"✅ Se eliminaron {eliminados} botoneras de los canales.")
+    await update.message.reply_text(f"✅ Eliminación completada. Errores: {errores}")
+
 
 # /listar_autorizados
 async def listar_autorizados(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -885,33 +927,6 @@ async def botonera(applicationp):
 
     for canal in canales:
         canal_id = canal.get("id")
-
-        # Excluir canales fijos
-        if canal_id and canal_id not in [-1002050701908, -1001920805141]:
-            try:
-                if encabezado.get("type") == "gif" and encabezado.get("file_id"):
-                    msg = await applicationp.bot.send_animation(
-                        chat_id=canal_id,
-                        animation=encabezado["file_id"],
-                        caption=encabezado["caption"],
-                        reply_markup=teclado,
-                        parse_mode="Markdown"
-                    )
-                else:
-                    msg = await application.bot.send_message(
-                        chat_id=canal_id,
-                        text=encabezado.get("caption", "Sin contenido"),
-                        reply_markup=teclado,
-                        parse_mode="Markdown"
-                    )
-
-                mensajes_publicados.append((canal_id, msg.message_id))
-                print(f"✅ Publicado en canal {canal_id}")
-
-            except Exception as e:
-                motivo = str(e)
-                print(f"❌ Error en canal {canal_id}: {motivo}")
-                await manejar_canal_invalido(canal, application, motivo)
 
         # Excluir canales fijos
         if canal_id and canal_id not in [-1002050701908, -1001920805141]:
