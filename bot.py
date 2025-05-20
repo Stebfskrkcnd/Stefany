@@ -12,6 +12,8 @@ import json
 import os
 import random
 import asyncio
+from datetime import datetime
+from pytz import timezone
 
  # ✅ Publicación con blacklist
 
@@ -758,6 +760,10 @@ async def estado(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id not in cargar_autorizados():
         await update.message.reply_text("No estás autorizado para usar este comando.")
         return
+
+    # Establece la zona horaria que desees (por ejemplo: America/New_York)
+    tz = timezone("America/New_York")
+    now = datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
 
     total_canales = 0
     fijos = ["SOBRENATURAL", "ADD MY CHANNEL"]
