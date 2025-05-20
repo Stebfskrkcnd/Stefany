@@ -197,7 +197,7 @@ for canal in canales:
         except Exception as e:
             print(f"❌ Error al publicar en {canal.get('nombre', 'desconocido')}: {e}")
 
-await update.message.reply_text("📬 Botonera publicada manualmente con éxito.")
+    await update.message.reply_text("📬 Botonera publicada manualmente con éxito.")
 
 
 # /eliminar_botonera
