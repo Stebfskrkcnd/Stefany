@@ -140,7 +140,6 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("✅ Botonera publicada correctamente.")
 
-                try:
     print(f"➡️ Publicando en canal: {canal['nombre']}")
     msg = await context.bot.send_message(
         chat_id=canal["id"],
