@@ -169,9 +169,6 @@ except Exception as e:
     with open("botonera.json", "w", encoding="utf-8") as f:
         json.dump(mensajes_publicados, f, ensure_ascii=False, indent=2)
 
-    await update.message.reply_text("📬 Botonera publicada manualmente con éxito.")
-
-
     # Crear botonera dinámica (mismos botones para todos)
     botones = []
     for canal in canales:
