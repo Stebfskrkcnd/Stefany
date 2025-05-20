@@ -122,7 +122,7 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # /eliminar_botonera
 async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print("🗑️ Comando /eliminarbotonera recibido")
+    print("🗑️ Comando /eliminar_botonera recibido")
     
     if not os.path.exists(CANAL_ARCHIVO):
         await update.message.reply_text("⚠️ No se encontró el archivo de canales.")
@@ -622,7 +622,7 @@ async def set_bot_commands(application):
         BotCommand("publicar_botonera", "publicar_botonera"),
         BotCommand("eliminar_botonera", "eliminar_botonera"),
         BotCommand("estado", "Ver estado actual del bot"),
-        BotCommand("ver_blacklist", "Ver canales bloqueados temporalmente")
+        BotCommand("ver_blacklist", "Ver canales bloqueados temporalmente"),
         BotCommand("autorizar", "Autoriza un usuario"),
         BotCommand("revocar", "Revoca un usuario"),
         BotCommand("listar_autorizados", "Ver usuarios autorizados"),
