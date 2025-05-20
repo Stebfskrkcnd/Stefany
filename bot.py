@@ -12,51 +12,9 @@ import json
 import os
 import random
 import asyncio
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from datetime import datetime
-from pytz import timezone
 
-async def notificar_programacion(application):
-    scheduler.add_job(
-        lambda: asyncio.create_task(publicar_botonera_diaria(application)),
-        "cron",
-        hour=18, minute=30, timezone="US/Eastern"
-    )
+ # ✅ Publicación con blacklist
 
-
- # ✅ Publicación automática diaria con blacklist
-async def publicar_botonera_diaria(application):
-    print("⏰ Ejecutando publicación automática de botonera")
-    if not os.path.exists(CANAL_ARCHIVO):
-        print("⚠️ No se encontró el archivo de canales.")
-        return
-
-    with open(CANAL_ARCHIVO, "r", encoding="utf-8") as f:
-        canales = json.load(f)
-
-    if not canales:
-        print("⚠️ No hay canales para publicar.")
-        return
-
-    print("📢 Publicando en los canales...")
-
-    for canal in canales:
-        print(f"✅ Publicado en canal: {canal.get('nombre', 'Sin nombre')}")
-
-AsyncIOScheduler(timezone=timezone("US/Eastern"))
-
-scheduler = AsyncIOScheduler()
-scheduler.add_job(
-    publicar_botonera_diaria,
-    trigger="cron",
-    hour=18, minute=30,
-    timezone="US/Eastern",
-    args=[application],
-    id="botonera_diaria",
-    replace_existing=True
-)
-
-scheduler.start()
 # === Blacklist ===
 BLACKLIST_FILE = "blacklist.json"
 
@@ -86,27 +44,6 @@ ENCABEZADO_FILE = "encabezado.txt"
 
 # ✅ Variable global
 mensajes_publicados = []
-
-# === Mostrar programación en consola y notificar a admins por Telegram ===
-for job in scheduler.get_jobs():
-    print(f"⏳ Job '{job.id}' programado para: {job.next_run_time}")
-
-# ✅ Notificar a admins vía Telegram la hora programada
-async def notificar_programacion(application):
-    print("⚙️ Ejecutando función notificar_programacion")
-
-    for job in scheduler.get_jobs():
-        hora = job.next_run_time.strftime("%Y-%m-%d %H:%M:%S %Z")
-        for admin_id in ADMIN_IDS:
-            try:
-                await application.bot.send_message(
-                    chat_id=admin_id,
-                    text=f"⏰ Botonera programada para: *{hora}*",
-                    parse_mode="Markdown"
-                )
-                print(f"✅ Notificación enviada a {admin_id}")
-            except Exception as e:
-                print(f"❌ Error notificando al admin {admin_id}: {e}")
 
 # === FUNCIONES BASE ===
 
@@ -160,6 +97,51 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     await update.message.reply_text("Hola, The Witch. El bot está listo para usarse.🔮")
+
+# /publicar_botonera
+    async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print("✅ Comando /publicarbotonera recibido")
+    
+    if not os.path.exists(CANAL_ARCHIVO):
+        await update.message.reply_text("⚠️ No se encontró el archivo de canales.")
+        return
+
+    with open(CANAL_ARCHIVO, "r", encoding="utf-8") as f:
+        canales = json.load(f)
+
+    if not canales:
+        await update.message.reply_text("⚠️ No hay canales para publicar.")
+        return
+
+    for canal in canales:
+        if not canal.get("fijo", False):  # Publicar solo en canales que NO son fijos
+            # Aquí va tu lógica para enviar la botonera a cada canal
+            print(f"➡️ Publicando en canal: {canal['nombre']}")
+            # await context.bot.send_message(chat_id=canal['id'], text="Aquí va tu botonera")
+
+    await update.message.reply_text("📬 Botonera publicada manualmente con exito.")
+
+# /eliminar_botonera
+async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print("🗑️ Comando /eliminarbotonera recibido")
+    
+    if not os.path.exists(CANAL_ARCHIVO):
+        await update.message.reply_text("⚠️ No se encontró el archivo de canales.")
+        return
+
+    with open(CANAL_ARCHIVO, "r", encoding="utf-8") as f:
+        canales = json.load(f)
+
+    if not canales:
+        await update.message.reply_text("⚠️ No hay canales para eliminar la botonera.")
+        return
+
+    for canal in canales:
+        # Aquí va tu lógica de eliminación y castigo si aplica
+        print(f"❌ Eliminando botonera en canal: {canal['nombre']}")
+        # await context.bot.delete_message(...) o lo que uses para borrar
+
+    await update.message.reply_text("🧹 Botonera eliminada manualmente con exito.")
 
 # /listar_autorizados
 async def listar_autorizados(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -314,8 +296,6 @@ async def agregar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"✅ Canal *{nombre}* agregado correctamente con ID `{canal_id}`",
         parse_mode="Markdown"
     )
-
-# === ELIMINACIÓN INTERACTIVA ===
 
 # === Eliminación con botones interactivos ===
 canales_temporales = {}
@@ -502,14 +482,6 @@ async def botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=teclado
         )
 
-    # Eliminar después de 23 horas
-    await asyncio.sleep(82800)
-    try:
-        await msg.delete()
-        await update.message.delete()
-    except:
-        pass
-
     # Mezclar y volver a añadir los fijos al final
     random.shuffle(canales)
     if fijo1: canales.append(fijo1)
@@ -596,53 +568,6 @@ async def revocar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     guardar_autorizados(autorizados)
     await update.message.reply_text(f"🚫 Usuario {uid} revocado correctamente.")
 
-# /test_botonera
-async def test_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id not in cargar_autorizados():
-        await update.message.reply_text("❌ No estás autorizado para hacer pruebas.")
-        return
-
-    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-
-    try:
-        with open(CANAL_ARCHIVO, "r", encoding="utf-8") as f:
-            canales = json.load(f)
-    except Exception as e:
-        await update.message.reply_text(f"⚠️ Error al leer canales: {e}")
-        return
-
-# /borrar_botonera
-async def borrar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id not in cargar_autorizados():
-        await update.message.reply_text("❌ No estás autorizado para usar este comando.")
-        return
-
-    eliminados = 0
-    for chat_id, message_id in mensajes_publicados:
-        try:
-            await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
-            eliminados += 1
-        except Exception as e:
-            print(f"⚠️ No se pudo borrar mensaje en {chat_id}: {e}")
-
-    mensajes_publicados.clear()
-    await update.message.reply_text(f"🗑️ {eliminados} mensajes de botonera eliminados.")
-
-    # /test_botonera
-async def test_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    global mensajes_publicados  # <-- Esta línea debe ir al principio
-
-    if update.effective_user.id not in cargar_autorizados():
-        await update.message.reply_text("❌ No estás autorizado para usar este comando.")
-        return
-
-    if not os.path.exists(CANAL_ARCHIVO):
-        await update.message.reply_text("No hay canales disponibles.")
-        return
-
-    with open(CANAL_ARCHIVO, "r", encoding="utf-8") as f:
-        canales = json.load(f)
-
     # Separar los fijos
     fijo1 = next((c for c in canales if "SOBRENATURAL" in c["nombre"]), None)
     fijo2 = next((c for c in canales if "ADD MY CHANNEL" in c["nombre"]), None)
@@ -695,16 +620,18 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
 async def set_bot_commands(application):
     comandos = [
         BotCommand("start", "Iniciar el bot"),
+        BotCommand("publicar_botonera", "publicar_botonera"),
+        BotCommand("eliminar_botonera", "eliminar_botonera"),
+        BotCommand("estado", "Ver estado actual del bot"),
+        BotCommand("ver_blacklist", "Ver canales bloqueados temporalmente")
         BotCommand("autorizar", "Autoriza un usuario"),
         BotCommand("revocar", "Revoca un usuario"),
         BotCommand("listar_autorizados", "Ver usuarios autorizados"),
-        BotCommand("agregar", "Agregar canal manualmente"),
+        BotCommand("agregar", "Agregar canal"),
         BotCommand("eliminar", "Eliminar canal con botones"),
-        BotCommand("botonera", "Enviar botonera de canales"),
         BotCommand("editar_encabezado", "Editar texto principal de la botonera"),
         BotCommand("ver_encabezado", "Ver encabezado actual de la botonera"),
-        BotCommand("estado", "Ver estado actual del bot"),
-        BotCommand("ver_blacklist", "Ver canales bloqueados temporalmente")
+        BotCommand("fileid", "Ver encabezado con gif"),
     ]
     await application.bot.set_my_commands(comandos)
 
@@ -763,10 +690,6 @@ application = ApplicationBuilder().token("1977028208:AAHpkAqAx78Ph5zErJWVfb9Y0wH
 
 # ✅ Configuraciones iniciales
 application.add_error_handler(error_handler)
-
-async def post_init(application):
-    await set_bot_commands(application)
-    await notificar_programacion(application)
 
 application.post_init = post_init
 # /editar_encabezado Texto nuevo
@@ -905,21 +828,18 @@ application.add_handler(CallbackQueryHandler(callback_eliminar))
 # ✅ Reenvíos privados
 application.add_handler(MessageHandler(filters.FORWARDED & filters.ChatType.PRIVATE, reenviado_handler))
 
-# ✅ Ejecutar notificación automática al iniciar el bot
-application.post_init = notificar_programacion
-
 # ✅ Registro de comandos
 application.add_handler(CommandHandler("start", start))
+application.add_handler(CommandHandler("publicar_botonera", publicar_botonera))
+application.add_handler(CommandHandler("eliminar_botonera", eliminar_botonera))
+application.add_handler(CommandHandler("agregar", agregar))
+application.add_handler(CommandHandler("eliminar", eliminar))
 application.add_handler(CommandHandler("autorizar", autorizar))
 application.add_handler(CommandHandler("revocar", revocar))
 application.add_handler(CommandHandler("listar_autorizados", listar_autorizados))
-application.add_handler(CommandHandler("agregar", agregar))
-application.add_handler(CommandHandler("eliminar", eliminar))
-application.add_handler(CommandHandler("botonera", botonera))
 application.add_handler(CommandHandler("test_botonera", test_botonera))
 application.add_handler(CommandHandler("editar_encabezado", editar_encabezado))
 application.add_handler(CommandHandler("ver_encabezado", ver_encabezado))
-application.add_handler(CommandHandler("borrar_botonera", borrar_botonera))
 application.add_handler(CommandHandler("fileid", fileid))
 application.add_handler(CommandHandler("estado", estado))
 application.add_handler(CommandHandler("ver_blacklist", ver_blacklist))
@@ -1008,9 +928,6 @@ async def botonera(applicationp):
         except Exception as e:
             print(f"⚠️ No se pudo notificar al admin {admin_id}: {e}")
 
-    # Borrar la botonera después de 23 horas
-    asyncio.create_task(eliminar_botonera_despues())
-
 # ✅ Enviar resumen a los administradores
     for admin_id in ADMIN_IDS:
         try:
@@ -1037,28 +954,6 @@ async def botonera(applicationp):
     encabezado = obtener_encabezado()
 
     asyncio.create_task(eliminar_botonera_despues())
-
-# 🗑️ Eliminación de botonera después de 23 horas
-async def eliminar_botonera_despues():
-    await asyncio.sleep(82800)  # 23 horas
-
-    exitosos = 0
-    fallos = 0
-
-    if os.path.exists(CANAL_ARCHIVO):
-        with open(CANAL_ARCHIVO, "r", encoding="utf-8") as f:
-            canales_info = json.load(f)
-    else:
-        canales_info = []
-
-    for chat_id, msg_id in mensajes_publicados:
-        try:
-            await application.bot.delete_message(chat_id=chat_id, message_id=msg_id)
-            exitosos += 1
-            print(f"🗑️ Mensaje eliminado en canal {chat_id}")
-        except Exception as e:
-            fallos += 1
-            print(f"❌ No se pudo eliminar en canal {chat_id}: {e}")
 
     # Notificación final
     for admin_id in ADMIN_IDS:
