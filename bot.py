@@ -771,23 +771,12 @@ async def estado(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     total_autorizados = len(cargar_autorizados())
 
-    from pytz import timezone
-    from datetime import datetime
-    tz = timezone("US/Eastern")
-    now = datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
-
-    proxima = "No programado"
-    job = scheduler.get_job("botonera_diaria")
-    if job and job.next_run_time:
-        proxima = job.next_run_time.astimezone(tz).strftime("%Y-%m-%d %H:%M:%S")
-
     texto = (
         f"🧠 *Estado del bot:*\n\n"
         f"• Fecha actual: `{now}`\n"
         f"• Canales totales: `{total_canales}`\n"
         f"• Canales fijos: `{canales_fijos}`\n"
         f"• Autorizados: `{total_autorizados}`\n"
-        f"• Próxima publicación: `{proxima}`"
     )
 
     await update.message.reply_text(texto, parse_mode="Markdown")
