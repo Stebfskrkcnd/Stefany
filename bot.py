@@ -31,11 +31,13 @@ app.add_handler(CallbackQueryHandler(callback_handler))
 
 async def main():
     print("✅ Bot ejecutándose correctamente...")
-    await app.run_polling()
+    await app.initialize()
+    await app.start()
+    await app.updater.start_polling()
+    await app.updater.wait_until_closed()
+    await app.stop()
+    await app.shutdown()
 
 if __name__ == "__main__":
-    import sys
-    if sys.platform == "win32":
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
-    asyncio.get_event_loop().run_until_complete(main())
+    import asyncio
+    asyncio.run(main())
