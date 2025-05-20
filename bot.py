@@ -636,7 +636,6 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
     print("❌ ERROR DETECTADO:", context.error)
 
 # ✅ Establecer comandos del menú /
-application.bot.set_my_commands
 
 async def set_bot_commands(application):
     comandos = [
