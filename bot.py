@@ -104,7 +104,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # /publicar_botonera
 async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("✅ Comando /publicar_botonera recibido")
-    
+
     if not os.path.exists(CANAL_ARCHIVO):
         await update.message.reply_text("⚠️ No se encontró el archivo de canales.")
         return
@@ -117,16 +117,26 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     for canal in canales:
-        if not canal.get("fijo", False):  # Publicar solo en canales que NO son fijos
-            print(f"➡️ Publicando en canal: {canal['nombre']}")
-            # await context.bot.send_message(chat_id=canal['id'], text="Aquí va tu botonera")
+        if not canal.get("fijo", False):  # Solo si NO es canal fijo
+            try:
+                print(f"➡️ Publicando en canal: {canal['nombre']}")
+                await context.bot.send_message(
+                    chat_id=canal["id"],
+                    text="Aquí va tu botonera ⬇️",  # Reemplaza este texto con el texto real
+                    reply_markup=InlineKeyboardMarkup([  # Ejemplo de botonera
+                        [InlineKeyboardButton("Canal A", url="https://t.me/CanalA")],
+                        [InlineKeyboardButton("Canal B", url="https://t.me/CanalB")]
+                    ])
+                )
+            except Exception as e:
+                print(f"❌ Error al publicar en {canal['nombre']}: {e}")
 
     await update.message.reply_text("📬 Botonera publicada manualmente con éxito.")
 
 # /eliminar_botonera
 async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("🗑️ Comando /eliminar_botonera recibido")
-    
+
     if not os.path.exists(CANAL_ARCHIVO):
         await update.message.reply_text("⚠️ No se encontró el archivo de canales.")
         return
@@ -135,15 +145,22 @@ async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
         canales = json.load(f)
 
     if not canales:
-        await update.message.reply_text("⚠️ No hay canales para eliminar la botonera.")
+        await update.message.reply_text("⚠️ No hay canales para procesar.")
         return
 
     for canal in canales:
-        # Aquí va tu lógica de eliminación y castigo si aplica
-        print(f"❌ Eliminando botonera en canal: {canal['nombre']}")
-        # await context.bot.delete_message(...) o lo que uses para borrar
+        if not canal.get("fijo", False):
+            try:
+                print(f"⛔ Eliminando botonera de: {canal['nombre']}")
+                await context.bot.send_message(
+                    chat_id=canal["id"],
+                    text="⚠️ Esta botonera fue eliminada por incumplir las normas."
+                )
+                # Si guardas ID del mensaje puedes usar bot.delete_message(...)
+            except Exception as e:
+                print(f"❌ Error al eliminar en {canal['nombre']}: {e}")
 
-    await update.message.reply_text("🧹 Botonera eliminada manualmente con exito.")
+    await update.message.reply_text("✅ Botonera eliminada manualmente en los canales no fijos.")
 
 # /listar_autorizados
 async def listar_autorizados(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -619,6 +636,8 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
     print("❌ ERROR DETECTADO:", context.error)
 
 # ✅ Establecer comandos del menú /
+application.bot.set_my_commands
+
 async def set_bot_commands(application):
     comandos = [
         BotCommand("start", "Iniciar el bot"),
@@ -635,6 +654,9 @@ async def set_bot_commands(application):
         BotCommand("ver_encabezado", "Ver encabezado actual de la botonera"),
         BotCommand("fileid", "Ver encabezado con gif"),
     ]
+
+    await _my_commands(comandos)
+    await application.bot.delete_my_commands()
     await application.bot.set_my_commands(comandos)
 
 # ✅ Reenvío de mensaje desde canal → guarda ID, nombre y enlace
