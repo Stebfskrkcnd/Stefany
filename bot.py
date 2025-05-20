@@ -177,10 +177,6 @@ except Exception as e:
                 [InlineKeyboardButton(text=canal["nombre"], url=canal["enlace"])]
             )
 
-    if not botones:
-        await update.message.reply_text("⚠️ No hay canales válidos para mostrar en la botonera.")
-        return
-
 for canal in canales:
     if not canal.get("fijo", False):  # Publicar solo en canales NO fijos
         try:
@@ -195,7 +191,9 @@ for canal in canales:
             )
         except Exception as e:
             print(f"❌ Error al publicar en {canal['nombre']}: {e}")
-
+    if not botones:
+        await update.message.reply_text("⚠️ No hay canales válidos para mostrar en la botonera.")
+        return
 await update.message.reply_text("📬 Botonera publicada manualmente con éxito.")
 
 # /eliminar_botonera
