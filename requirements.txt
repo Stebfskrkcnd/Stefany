@@ -1,3 +1,2 @@
-python-telegram-bot==20.8
-apscheduler==3.10.4
-pytz
+python-telegram-bot==22.1
+httpx

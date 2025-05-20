@@ -1,15 +1,20 @@
-Botonera Telegram Bot - Versión 1.0
+# 🤖 Botonera Bot - Telegram
 
-INSTRUCCIONES:
+Bot de Telegram 24/7 para publicar botoneras en múltiples canales, con control de usuarios, sistema de castigo automático y gif de encabezado.
 
-1. Edita el archivo bot.py y coloca tu TOKEN donde dice "TU_TOKEN_AQUI".
-2. Abre channels.json y agrega tus canales con su nombre, enlace, chat_id y número de suscriptores.
-3. Instala los requisitos con:
-   pip install -r requirements.txt
-4. Ejecuta el bot con:
-   python bot.py
+## Características
 
-NOTA:
-- El bot eliminará mensajes automáticamente.
-- Canales con menos de 10,000 miembros serán ignorados.
-- Si un canal elimina el mensaje manualmente, será baneado por 3 meses.
+- Botonera con canales en orden aleatorio (excepto dos canales fijos)
+- Encabezado GIF configurable con caption
+- Comandos protegidos por lista de usuarios autorizados
+- Panel interactivo para activar/desactivar canales
+- Castigo automático para canales que quitan permisos
+- Notificaciones automáticas a administradores
+
+## Instalación
+
+1. Clona el proyecto o crea la estructura desde los archivos entregados.
+2. En config.py, reemplaza:
+
+```python
+BOT_TOKEN = "AQUÍ VA TU TOKEN"
