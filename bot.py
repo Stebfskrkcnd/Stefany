@@ -83,7 +83,8 @@ async def log_intento_no_autorizado(update: Update, comando: str):
         except Exception as e:
             print(f"❌ No se pudo enviar el log a {admin_id} → {e}")
 
-
+async def post_init(application):
+    print("✅ Bot iniciado correctamente.")
 # === COMANDOS ===
 
 # /start
