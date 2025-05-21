@@ -67,7 +67,6 @@ try:
 except Exception as e:
     await update.message.reply_text(f"Error en agregar: {e}")
         return
-
     blacklist = load_json("data/blacklist.json")
     for b in blacklist:
         if b["id"] == canal_id:
