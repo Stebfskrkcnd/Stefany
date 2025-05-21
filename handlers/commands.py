@@ -59,7 +59,7 @@ async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not autorizado(update.effective_user.id):
         return
 
-    print(">>> Args recibidos:", context.args)
+print(">>> Args recibidos:", context.args)
 
 try:
     if len(context.args) < 3:
@@ -70,7 +70,9 @@ try:
     nombre = context.args[1]
     enlace = context.args[2]
 
-    await update.message.reply_text(f"✅ Canal recibido:\nID: {canal_id}\nNombre: {nombre}\nEnlace: {enlace}")
+    await update.message.reply_text(
+        f"✅ Canal recibido:\nID: {canal_id}\nNombre: {nombre}\nEnlace: {enlace}"
+    )
 except Exception as e:
     await update.message.reply_text(f"❌ Error en agregar: {e}")
     return
