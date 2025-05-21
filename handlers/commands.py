@@ -7,8 +7,7 @@ from datetime import datetime, timedelta
 from telegram import Update
 from telegram import InputMediaAnimation
 from telegram.ext import ContextTypes
-from utils.helpers import load_json
-from utils.helpers import save_json
+from utils.helpers import load_json, save_json
 import json
 
 def cargar_autorizados():
