@@ -61,7 +61,7 @@ async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     print(">>> Args recibidos:", context.args)
 
-    try:
+try:
     if len(context.args) < 3:
         await update.message.reply_text("❗ Uso incorrecto. Formato: /agregar <canal_id> <nombre> <enlace>")
         return
