@@ -20,8 +20,6 @@ def cargar_autorizados():
 USUARIOS_AUTORIZADOS = cargar_autorizados()
 ZONA_HORARIA = os.getenv("ZONA_HORARIA", "America/New_York")
 
-print(">>> channels.json contiene:", channels)
-
 # Si quieres usar CANALES_FIJOS como JSON string desde una variable:
 import json
 try:
@@ -58,6 +56,8 @@ async def estado_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
 """ + "\n".join([f"🔒 {u}" for u in users])
 
     await update.message.reply_text(estado)
+    
+print(">>> channels.json contiene:", channels)
 
 async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not autorizado(update.effective_user.id):
