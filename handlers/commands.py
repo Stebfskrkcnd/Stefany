@@ -2,6 +2,8 @@ import os
 
 import pytz
 from datetime import datetime, timedelta
+from telegram import Update
+from telegram.ext import ContextTypes
 
 USUARIOS_AUTORIZADOS = [int(uid) for uid in os.getenv("USUARIOS_AUTORIZADOS", "").split(",") if uid]
 ZONA_HORARIA = os.getenv("ZONA_HORARIA", "America/New_York")
@@ -34,7 +36,6 @@ async def estado_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     fixed = CANALES_FIJOS
     now = datetime.now(pytz.timezone(ZONA_HORARIA)).strftime("%Y-%m-%d %H:%M:%S")
     users = load_json("data/authorized.json")
-
     estado = f"""📊 Estado del Bot
 🕒 Fecha y hora: {now}
 📢 Canales activos: {len([c for c in channels if c['activo']])}
