@@ -21,7 +21,7 @@ from handlers.commands import (
     listar_autorizados,
     editar_encabezado,
     ver_encabezado,
-    guardar_encabezado  # <= IMPORTANTE
+    guardar_encabezado
 )
 
 from handlers.callbacks import callback_handler
