@@ -66,7 +66,7 @@ try:
         enlace = context.args[2]
 except Exception as e:
     await update.message.reply_text(f"Error en agregar: {e}")
-        return
+    return
     blacklist = load_json("data/blacklist.json")
     for b in blacklist:
         if b["id"] == canal_id:
