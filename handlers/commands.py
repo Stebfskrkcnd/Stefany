@@ -9,6 +9,7 @@ from telegram import InputMediaAnimation
 from telegram.ext import ContextTypes
 from utils.helpers import load_json
 from utils.helpers import save_json
+from utils.helpers import notificar_admins
 import json
 
 def cargar_autorizados():
@@ -117,6 +118,9 @@ async def eliminar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard.append([InlineKeyboardButton("💾 Guardar cambios", callback_data="guardar")])
 
     await update.message.reply_text("Selecciona los canales a desactivar:", reply_markup=InlineKeyboardMarkup(keyboard))
+
+async def notificar_admins(msg):
+    print(f"[ADMIN] {msg}")
 
 async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not autorizado(update.effective_user.id):
