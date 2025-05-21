@@ -1,10 +1,26 @@
 from telegram.ext import (
-    ApplicationBuilder, CommandHandler, CallbackQueryHandler
+    ApplicationBuilder,
+    CommandHandler,
+    CallbackQueryHandler
 )
 import os
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-from handlers.commands import (start, estado_bot, agregar_canal, eliminar_canal, publicar_botonera, eliminar_botonera, autorizar, revocar, listar_autorizados, editar_encabezado, ver_encabezado,
+
+from handlers.commands import (
+    start,
+    estado_bot,
+    agregar_canal,
+    eliminar_canal,
+    publicar_botonera,
+    eliminar_botonera,
+    autorizar,
+    revocar,
+    listar_autorizados,
+    editar_encabezado,
+    ver_encabezado
 )
+
 from handlers.callbacks import callback_handler
 
 app = ApplicationBuilder().token(BOT_TOKEN).build()
