@@ -6,9 +6,16 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from utils.helpers import load_json
 
-USUARIOS_AUTORIZADOS = [
-    int(uid) for uid in os.getenv("USUARIOS_AUTORIZADOS", "").split(",") if uid.strip().isdigit()
-]
+import json
+
+def cargar_autorizados():
+    try:
+        with open("data/autorizados.json", "r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
+USUARIOS_AUTORIZADOS = cargar_autorizados()
 ZONA_HORARIA = os.getenv("ZONA_HORARIA", "America/New_York")
 
 # Si quieres usar CANALES_FIJOS como JSON string desde una variable:
@@ -136,19 +143,27 @@ async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("✅ Botonera eliminada con éxito (simulación).")
 
 async def autorizar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not autorizado(update.effective_user.id):
+    user_id = update.effective_user.id
+    if not autorizado(user_id):
         return
+
     try:
-        nuevo = int(context.args[0])
-        users = load_json("data/authorized.json")
-        if nuevo not in users:
-            users.append(nuevo)
-            save_json("data/authorized.json", users)
-            await update.message.reply_text("✅ Usuario autorizado.")
-        else:
-            await update.message.reply_text("⚠️ Ya estaba autorizado.")
-    except:
+        nuevo_id = int(context.args[0])
+    except (IndexError, ValueError):
         await update.message.reply_text("Uso: /autorizar <user_id>")
+        return
+
+    if nuevo_id in USUARIOS_AUTORIZADOS:
+        await update.message.reply_text("✅ Este usuario ya está autorizado.")
+        return
+
+    USUARIOS_AUTORIZADOS.append(nuevo_id)
+
+    # Guardar en archivo
+    with open("data/autorizados.json", "w", encoding="utf-8") as f:
+        json.dump(USUARIOS_AUTORIZADOS, f)
+
+    await update.message.reply_text(f"✅ Usuario {nuevo_id} autorizado correctamente.")
 
 async def revocar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not autorizado(update.effective_user.id):
