@@ -45,7 +45,7 @@ async def estado_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     channels = load_json("data/channels.json")
     fixed = CANALES_FIJOS
     now = datetime.now(pytz.timezone(ZONA_HORARIA)).strftime("%Y-%m-%d %H:%M:%S")
-    users = load_json("data/authorized.json")
+    users = USUARIOS_AUTORIZADOS
     estado = f"""📊 Estado del Bot
 🕒 Fecha y hora: {now}
 📢 Canales activos: {len([c for c in channels if c['activo']])}
