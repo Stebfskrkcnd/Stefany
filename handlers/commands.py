@@ -62,12 +62,18 @@ async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(">>> Args recibidos:", context.args)
 
     try:
-        canal_id = int(context.args[0])
-        nombre = context.args[1]
-        enlace = context.args[2]
-    except Exception as e:
-        await update.message.reply_text(f"Error en agregar: {e}")
+    if len(context.args) < 3:
+        await update.message.reply_text("❗ Uso incorrecto. Formato: /agregar <canal_id> <nombre> <enlace>")
         return
+
+    canal_id = int(context.args[0])
+    nombre = context.args[1]
+    enlace = context.args[2]
+
+    await update.message.reply_text(f"✅ Canal recibido:\nID: {canal_id}\nNombre: {nombre}\nEnlace: {enlace}")
+except Exception as e:
+    await update.message.reply_text(f"❌ Error en agregar: {e}")
+    return
 
     blacklist = load_json("data/blacklist.json")
     for b in blacklist:
