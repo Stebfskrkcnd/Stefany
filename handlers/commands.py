@@ -4,6 +4,7 @@ import pytz
 from datetime import datetime, timedelta
 from telegram import Update
 from telegram.ext import ContextTypes
+from utils.helpers import load_json
 
 USUARIOS_AUTORIZADOS = [int(uid) for uid in os.getenv("USUARIOS_AUTORIZADOS", "").split(",") if uid]
 ZONA_HORARIA = os.getenv("ZONA_HORARIA", "America/New_York")
