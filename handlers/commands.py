@@ -7,7 +7,7 @@ from telegram.ext import ContextTypes
 from utils.helpers import load_json
 
 import json
-#Fuerza nuevo deploy
+
 def cargar_autorizados():
     try:
         with open("data/autorizados.json", "r", encoding="utf-8") as f:
@@ -60,7 +60,7 @@ async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
 print(">>> Args recibidos:", context.args)
-    try:
+try:
         canal_id = int(context.args[0])
         nombre = context.args[1]
         enlace = context.args[2]
