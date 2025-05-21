@@ -1,7 +1,9 @@
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
-    CallbackQueryHandler
+    CallbackQueryHandler,
+    MessageHandler,
+    filters
 )
 
 import os
@@ -18,7 +20,8 @@ from handlers.commands import (
     revocar,
     listar_autorizados,
     editar_encabezado,
-    ver_encabezado
+    ver_encabezado,
+    guardar_encabezado  # <= IMPORTANTE
 )
 
 from handlers.callbacks import callback_handler
@@ -36,7 +39,11 @@ app.add_handler(CommandHandler("revocar", revocar))
 app.add_handler(CommandHandler("listar", listar_autorizados))
 app.add_handler(CommandHandler("encabezado", ver_encabezado))
 app.add_handler(CommandHandler("editar_encabezado", editar_encabezado))
+app.add_handler(MessageHandler(filters.ANIMATION & filters.TEXT, guardar_encabezado))  # <= CRUCIAL
 app.add_handler(CallbackQueryHandler(callback_handler))
+
+from telegram.ext import MessageHandler, filters
+app.add_handler(MessageHandler(filters.ANIMATION & filters.Caption(), guardar_encabezado))
 
 print("✅ Bot ejecutándose correctamente...")
 app.run_polling(stop_signals=None)

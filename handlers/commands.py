@@ -3,6 +3,7 @@ import os
 import pytz
 from datetime import datetime, timedelta
 from telegram import Update
+from telegram import InputMediaAnimation
 from telegram.ext import ContextTypes
 from utils.helpers import load_json
 
@@ -226,3 +227,54 @@ async def ver_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     e = load_json("data/encabezado.json")
     await context.bot.send_animation(chat_id=update.effective_chat.id, animation=e["fileid"], caption=e["caption"])
+
+import os
+import json
+
+ENCABEZADO_PATH = "data/encabezado.json"
+
+def load_encabezado():
+    if not os.path.exists(ENCABEZADO_PATH):
+        return {}
+    with open(ENCABEZADO_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+def save_encabezado(data):
+    with open(ENCABEZADO_PATH, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+# Comando /editar_encabezado
+async def editar_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not autorizado(update.effective_user.id):
+        return
+    await update.message.reply_text("Envia un gif con el nuevo encabezado (caption).")
+
+# Captura el gif después del comando
+async def guardar_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not autorizado(update.effective_user.id):
+        return
+
+    if not update.message.animation:
+        await update.message.reply_text("❌ Debes enviar un GIF (no imagen, no video).")
+        return
+
+    gif_file_id = update.message.animation.file_id
+    caption = update.message.caption or ""
+
+    save_encabezado({"gif": gif_file_id, "caption": caption})
+    await update.message.reply_text("✅ Encabezado actualizado correctamente.")
+
+# Comando /encabezado
+async def ver_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not autorizado(update.effective_user.id):
+        return
+
+    encabezado = load_encabezado()
+    if not encabezado or "gif" not in encabezado:
+        await update.message.reply_text("❌ No hay encabezado configurado.")
+        return
+
+    await update.message.reply_animation(
+        animation=encabezado["gif"],
+        caption=encabezado.get("caption", "")
+    )
