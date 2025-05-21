@@ -64,7 +64,7 @@ try:
         canal_id = int(context.args[0])
         nombre = context.args[1]
         enlace = context.args[2]
-    except Exception as e:
+except Exception as e:
     await update.message.reply_text(f"Error en agregar: {e}")
         return
 
