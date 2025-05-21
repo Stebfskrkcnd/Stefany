@@ -9,6 +9,15 @@ from telegram.ext import (
 import os
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
+import logging
+
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+
+logger = logging.getLogger(__name__)
+
 from handlers.commands import (
     start,
     estado_bot,
@@ -41,6 +50,14 @@ app.add_handler(CommandHandler("encabezado", ver_encabezado))
 app.add_handler(CommandHandler("editar_encabezado", editar_encabezado))
 app.add_handler(MessageHandler(filters.ANIMATION & filters.TEXT, guardar_encabezado))  # <= CRUCIAL
 app.add_handler(CallbackQueryHandler(callback_handler))
+
+from telegram.error import TelegramError
+from telegram.ext import ContextTypes
+
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logger.error("Exception while handling update:", exc_info=context.error)
+
+app.add_error_handler(error_handler)
 
 from telegram.ext import MessageHandler, filters
 app.add_handler(MessageHandler(filters.ANIMATION & filters.Caption(), guardar_encabezado))
