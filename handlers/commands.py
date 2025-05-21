@@ -45,6 +45,7 @@ async def estado_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     channels = load_json("data/channels.json")
+    print(">>> channels.json contiene:", channels)
     fixed = CANALES_FIJOS
     now = datetime.now(pytz.timezone(ZONA_HORARIA)).strftime("%Y-%m-%d %H:%M:%S")
     users = USUARIOS_AUTORIZADOS
@@ -56,8 +57,6 @@ async def estado_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
 """ + "\n".join([f"🔒 {u}" for u in users])
 
     await update.message.reply_text(estado)
-    
-print(">>> channels.json contiene:", channels)
 
 async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not autorizado(update.effective_user.id):
