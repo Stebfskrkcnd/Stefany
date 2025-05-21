@@ -59,25 +59,34 @@ async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not autorizado(update.effective_user.id):
         return
 
-print(">>> Args recibidos:", context.args)
-try:
+    print(">>> Args recibidos:", context.args)
+
+    try:
         canal_id = int(context.args[0])
         nombre = context.args[1]
         enlace = context.args[2]
-except Exception as e:
-    await update.message.reply_text(f"Error en agregar: {e}")
-    return
+    except Exception as e:
+        await update.message.reply_text(f"Error en agregar: {e}")
+        return
+
     blacklist = load_json("data/blacklist.json")
     for b in blacklist:
         if b["id"] == canal_id:
-            await update.message.reply_text(f"❌ Canal no agregado. En lista negra desde {b['desde']} hasta {b['hasta']}.")
+            await update.message.reply_text(
+                f"❌ Canal no agregado. En lista negra desde {b['desde']} hasta {b['hasta']}."
+            )
             return
 
     channels = load_json("data/channels.json")
     if any(c["id"] == canal_id for c in channels):
         await update.message.reply_text("⚠️ El canal ya está agregado.")
     else:
-        channels.append({"id": canal_id, "nombre": nombre, "enlace": enlace, "activo": True})
+        channels.append({
+            "id": canal_id,
+            "nombre": nombre,
+            "enlace": enlace,
+            "activo": True
+        })
         save_json("data/channels.json", channels)
         await update.message.reply_text("✅ Canal agregado correctamente.")
 

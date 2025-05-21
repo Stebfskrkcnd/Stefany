@@ -3,8 +3,8 @@ from telegram.ext import (
     CommandHandler,
     CallbackQueryHandler
 )
-import os
 
+import os
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 from handlers.commands import (
