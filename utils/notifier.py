@@ -1,5 +1,9 @@
-from config import USUARIOS_AUTORIZADOS, BOT_TOKEN
+import os
+
 from telegram import Bot
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+USUARIOS_AUTORIZADOS = [int(uid) for uid in os.getenv("USUARIOS_AUTORIZADOS", "").split(",") if uid]
 
 async def notificar_admins(mensaje):
     bot = Bot(token=BOT_TOKEN)

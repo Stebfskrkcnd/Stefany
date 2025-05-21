@@ -1,11 +1,17 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ContextTypes
-from config import USUARIOS_AUTORIZADOS, CANALES_FIJOS, ZONA_HORARIA
-from utils.storage import load_json, save_json
-from utils.notifier import notificar_admins
-from datetime import datetime, timedelta
+import os
+
 import pytz
-import random
+from datetime import datetime, timedelta
+
+USUARIOS_AUTORIZADOS = [int(uid) for uid in os.getenv("USUARIOS_AUTORIZADOS", "").split(",") if uid]
+ZONA_HORARIA = os.getenv("ZONA_HORARIA", "America/New_York")
+
+# Si quieres usar CANALES_FIJOS como JSON string desde una variable:
+import json
+try:
+    CANALES_FIJOS = json.loads(os.getenv("CANALES_FIJOS", "[]"))
+except:
+    CANALES_FIJOS = []
 
 def autorizado(user_id):
     return user_id in USUARIOS_AUTORIZADOS
