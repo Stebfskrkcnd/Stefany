@@ -20,6 +20,8 @@ def cargar_autorizados():
 USUARIOS_AUTORIZADOS = cargar_autorizados()
 ZONA_HORARIA = os.getenv("ZONA_HORARIA", "America/New_York")
 
+print(">>> channels.json contiene:", channels)
+
 # Si quieres usar CANALES_FIJOS como JSON string desde una variable:
 import json
 try:
