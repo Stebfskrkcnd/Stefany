@@ -9,7 +9,6 @@ from telegram import InputMediaAnimation
 from telegram.ext import ContextTypes
 from utils.helpers import load_json
 from utils.helpers import save_json
-from utils.helpers import notificar_admins
 import json
 
 def cargar_autorizados():
