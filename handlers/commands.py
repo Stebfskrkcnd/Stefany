@@ -7,7 +7,7 @@ from telegram.ext import ContextTypes
 from utils.helpers import load_json
 
 import json
-
+# Línea agregada para forzar deploy a Railway
 def cargar_autorizados():
     try:
         with open("data/autorizados.json", "r", encoding="utf-8") as f:
