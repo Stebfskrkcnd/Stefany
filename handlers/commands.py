@@ -7,7 +7,7 @@ from telegram.ext import ContextTypes
 from utils.helpers import load_json
 
 import json
-# Línea agregada para forzar deploy a Railway
+#Fuerza nuevo deploy
 def cargar_autorizados():
     try:
         with open("data/autorizados.json", "r", encoding="utf-8") as f:
@@ -59,12 +59,13 @@ async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not autorizado(update.effective_user.id):
         return
 
+print(">>> Args recibidos:", context.args)
     try:
         canal_id = int(context.args[0])
         nombre = context.args[1]
         enlace = context.args[2]
-    except:
-        await update.message.reply_text("Uso: /agregar <canal_id> <nombre> <enlace>")
+    except Exception as e:
+    await update.message.reply_text(f"Error en agregar: {e}")
         return
 
     blacklist = load_json("data/blacklist.json")
