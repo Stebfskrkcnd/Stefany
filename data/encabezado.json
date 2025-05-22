@@ -1,6 +1,5 @@
 {
-  "fileid": "CgACAgQAAxkBAAIBWmXyLZ...",
-  "caption": "Canales del día disponibles"
+  "type": "gif",
+  "fileid": "CAACAgQAAxkBAAEBaYxkZx...",
+  "caption": "Mi encabezado nuevo"
 }
-print(">>> DEBUG encabezado actualizado:", encabezado)
-print(">>> Ruta absoluta:", os.path.abspath("data/encabezado.json"))

@@ -250,12 +250,6 @@ def save_encabezado(data):
     with open(ENCABEZADO_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-# Comando /editar_encabezado
-async def editar_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not autorizado(update.effective_user.id):
-        return
-    await update.message.reply_text("Envia un gif con el nuevo encabezado (caption).")
-
 # Captura el gif después del comando
 async def guardar_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not autorizado(update.effective_user.id):
