@@ -21,4 +21,10 @@ def load_json(path, default=None):
     except Exception as e:
         logging.error(f"❌ Error leyendo {path}: {e}")
         return default if default is not None else []
+
+def get_encabezado():
+    return {
+        "fileid": os.getenv("ENCABEZADO_FILEID", ""),
+        "caption": os.getenv("ENCABEZADO_CAPTION", "")
+    }
     

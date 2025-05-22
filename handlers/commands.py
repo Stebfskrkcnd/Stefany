@@ -1,4 +1,4 @@
-import os
+import os, json
 
 import pytz
 import random
@@ -9,7 +9,6 @@ from telegram import Update
 from telegram import InputMediaAnimation
 from telegram.ext import ContextTypes
 from utils.helpers import load_json, save_json
-import json
 
 def cargar_autorizados():
     try:
@@ -165,10 +164,21 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_json("data/channels.json", channels)
     await update.message.reply_text(f"✅ Publicados: {success}, ❌ Fallidos: {failed}")
 
+    encabezado = get_encabezado()
+
+await context.bot.send_animation(
+    chat_id=ch["id"],
+    animation=encabezado["fileid"],
+    caption=encabezado["caption"],
+    reply_markup=markup,
+    allow_sending_without_reply=True
+)
+
 async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not autorizado(update.effective_user.id):
         return
     await update.message.reply_text("✅ Botonera eliminada con éxito (simulación).")
+
 
 async def autorizar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
