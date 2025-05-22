@@ -4,6 +4,7 @@ import logging
 
 def save_json(path, data):
     try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
         logging.info(f"✅ JSON guardado en {os.path.abspath(path)}")
@@ -20,3 +21,4 @@ def load_json(path, default=None):
     except Exception as e:
         logging.error(f"❌ Error leyendo {path}: {e}")
         return default if default is not None else []
+    
