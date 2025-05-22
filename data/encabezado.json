@@ -2,3 +2,5 @@
   "fileid": "CgACAgQAAxkBAAIBWmXyLZ...",
   "caption": "Canales del día disponibles"
 }
+print(">>> DEBUG encabezado actualizado:", encabezado)
+print(">>> Ruta absoluta:", os.path.abspath("data/encabezado.json"))
