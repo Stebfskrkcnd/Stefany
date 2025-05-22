@@ -10,13 +10,13 @@ def save_json(path, data):
     except Exception as e:
         logging.error(f"❌ Error guardando {path}: {e}")
 
-def load_json(path):
+def load_json(path, default=None):
     try:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
         logging.warning(f"⚠️ Archivo no encontrado: {path}")
-        return []
+        return default if default is not None else []
     except Exception as e:
         logging.error(f"❌ Error leyendo {path}: {e}")
-        return []
+        return default if default is not None else []
