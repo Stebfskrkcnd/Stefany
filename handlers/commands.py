@@ -2,6 +2,7 @@ import os
 
 import pytz
 import random
+import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime, timedelta
 from telegram import Update
@@ -17,7 +18,7 @@ def cargar_autorizados():
     except FileNotFoundError:
         return []
 
-USUARIOS_AUTORIZADOS = cargar_autorizados()
+USUARIOS_AUTORIZADOS = load_json("data/autorizados.json", [])
 ZONA_HORARIA = os.getenv("ZONA_HORARIA", "America/New_York")
 
 #para hacr deploy
@@ -47,7 +48,7 @@ async def estado_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     channels = load_json("data/channels.json")
-    print(">>> channels.json contiene:", channels)
+    logging.info("➡️ channels.json contiene: %s", channels)
     fixed = CANALES_FIJOS
     now = datetime.now(pytz.timezone(ZONA_HORARIA)).strftime("%Y-%m-%d %H:%M:%S")
     users = USUARIOS_AUTORIZADOS

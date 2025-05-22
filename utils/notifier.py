@@ -12,3 +12,5 @@ async def notificar_admins(mensaje):
             await bot.send_message(chat_id=uid, text=mensaje)
         except:
             pass
+        except Exception as e:
+    logging.warning(f"Fallo notificando a {uid}: {e}")

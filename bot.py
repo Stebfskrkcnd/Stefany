@@ -1,23 +1,26 @@
+import os
+import logging
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
     CallbackQueryHandler,
     MessageHandler,
+    ContextTypes,
     filters
 )
+from telegram.error import TelegramError
 
-import os
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-
-import logging
-
+# Configuración de logging
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO
 )
-
 logger = logging.getLogger(__name__)
 
+# Token desde variable de entorno
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+# Handlers de comandos
 from handlers.commands import (
     start,
     estado_bot,
@@ -33,10 +36,13 @@ from handlers.commands import (
     guardar_encabezado
 )
 
+# Callback handler
 from handlers.callbacks import callback_handler
 
+# Crear app
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 
+# Registro de handlers
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("estado", estado_bot))
 app.add_handler(CommandHandler("agregar", agregar_canal))
@@ -48,19 +54,17 @@ app.add_handler(CommandHandler("revocar", revocar))
 app.add_handler(CommandHandler("listar", listar_autorizados))
 app.add_handler(CommandHandler("encabezado", ver_encabezado))
 app.add_handler(CommandHandler("editar_encabezado", editar_encabezado))
-app.add_handler(MessageHandler(filters.ANIMATION & filters.TEXT, guardar_encabezado))  # <= CRUCIAL
+app.add_handler(MessageHandler(filters.ANIMATION & filters.TEXT, guardar_encabezado))
+app.add_handler(MessageHandler(filters.ANIMATION & filters.Caption(), guardar_encabezado))
 app.add_handler(CallbackQueryHandler(callback_handler))
 
-from telegram.error import TelegramError
-from telegram.ext import ContextTypes
-
+# Manejo de errores
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
     logger.error("Exception while handling update:", exc_info=context.error)
 
 app.add_error_handler(error_handler)
 
-from telegram.ext import MessageHandler, filters
-app.add_handler(MessageHandler(filters.ANIMATION & filters.Caption(), guardar_encabezado))
-
-print("✅ Bot ejecutándose correctamente...")
-app.run_polling(stop_signals=None)
+# Entry point final
+if name == "__main__":
+    print("✅ Bot ejecutándose correctamente...")
+    app.run_polling(stop_signals=None)
