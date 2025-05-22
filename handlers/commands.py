@@ -127,7 +127,6 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not autorizado(update.effective_user.id):
         return
 
-    encabezado = load_json("data/encabezado.json")
     channels = [c for c in load_json("data/channels.json") if c["activo"]]
     random.shuffle(channels)
 
@@ -215,71 +214,3 @@ async def listar_autorizados(update: Update, context: ContextTypes.DEFAULT_TYPE)
     users = load_json("data/authorized.json")
     lista = "\n".join([f"🔒 {u}" for u in users])
     await update.message.reply_text(f"Usuarios autorizados:\n{lista}")
-
-async def editar_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not autorizado(update.effective_user.id):
-        return
-    if not update.message.animation:
-        await update.message.reply_text("Envía un gif con el nuevo encabezado (caption).")
-        return
-    nuevo = {
-        "type": "gif",
-        "fileid": update.message.animation.file_id,
-        "caption": update.message.caption or ""
-    }
-    save_json("data/encabezado.json", nuevo)
-    await update.message.reply_text("✅ Encabezado actualizado.")
-
-async def ver_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not autorizado(update.effective_user.id):
-        return
-    e = load_json("data/encabezado.json")
-    await context.bot.send_animation(chat_id=update.effective_chat.id, animation=e["fileid"], caption=e["caption"])
-
-import os
-import json
-
-ENCABEZADO_PATH = "data/encabezado.json"
-
-def load_encabezado():
-    if not os.path.exists(ENCABEZADO_PATH):
-        return {}
-    with open(ENCABEZADO_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-def save_encabezado(data):
-    with open(ENCABEZADO_PATH, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-# Captura el gif después del comando
-async def guardar_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not autorizado(update.effective_user.id):
-        return
-
-    if not update.message.animation:
-        await update.message.reply_text("❌ Debes enviar un GIF (no imagen, no video).")
-        return
-
-    gif_file_id = update.message.animation.file_id
-    caption = update.message.caption or ""
-
-    save_json("data/encabezado.json", {
-    "gif": gif_file_id,
-    "caption": caption
-})
-    await update.message.reply_text("✅ Encabezado actualizado correctamente.")
-
-# Comando /encabezado
-async def ver_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not autorizado(update.effective_user.id):
-        return
-
-    encabezado = load_encabezado()
-    if not encabezado or "gif" not in encabezado:
-        await update.message.reply_text("❌ No hay encabezado configurado.")
-        return
-
-    await update.message.reply_animation(
-        animation=encabezado["gif"],
-        caption=encabezado.get("caption", "")
-    )

@@ -30,10 +30,7 @@ from handlers.commands import (
     eliminar_botonera,
     autorizar,
     revocar,
-    listar_autorizados,
-    editar_encabezado,
-    ver_encabezado,
-    guardar_encabezado
+    listar_autorizados
 )
 
 # Callback handler
@@ -52,10 +49,6 @@ app.add_handler(CommandHandler("borrar", eliminar_botonera))
 app.add_handler(CommandHandler("autorizar", autorizar))
 app.add_handler(CommandHandler("revocar", revocar))
 app.add_handler(CommandHandler("listar", listar_autorizados))
-app.add_handler(CommandHandler("encabezado", ver_encabezado))
-app.add_handler(CommandHandler("editar_encabezado", editar_encabezado))
-app.add_handler(MessageHandler(filters.ANIMATION & filters.TEXT, guardar_encabezado))
-app.add_handler(MessageHandler(filters.ANIMATION & filters.Caption(), guardar_encabezado))
 app.add_handler(CallbackQueryHandler(callback_handler))
 
 # Manejo de errores
