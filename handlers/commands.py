@@ -268,7 +268,10 @@ async def guardar_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE)
     gif_file_id = update.message.animation.file_id
     caption = update.message.caption or ""
 
-    save_encabezado({"gif": gif_file_id, "caption": caption})
+    save_json("data/encabezado.json", {
+    "gif": gif_file_id,
+    "caption": caption
+})
     await update.message.reply_text("✅ Encabezado actualizado correctamente.")
 
 # Comando /encabezado
