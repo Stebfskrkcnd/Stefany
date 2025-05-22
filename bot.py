@@ -65,6 +65,6 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
 app.add_error_handler(error_handler)
 
 # Entry point final
-if name == "__main__":
+if __name__ == "__main__":
     print("✅ Bot ejecutándose correctamente...")
     app.run_polling(stop_signals=None)
