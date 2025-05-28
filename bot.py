@@ -18,7 +18,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Token desde variable de entorno
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 
 # Handlers de comandos
 from handlers.commands import (
@@ -56,9 +56,6 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
     logger.error("Exception while handling update:", exc_info=context.error)
 
 app.add_error_handler(error_handler)
-
-ENCABEZADO_FILEID = os.getenv("ENCABEZADO_FILEID", "")
-ENCABEZADO_CAPTION = os.getenv("ENCABEZADO_CAPTION", "")
 
 # Entry point final
 if __name__ == "__main__":

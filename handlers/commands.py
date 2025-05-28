@@ -32,69 +32,93 @@ def autorizado(user_id):
     return user_id in USUARIOS_AUTORIZADOS
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    if autorizado(user_id):
-        await update.message.reply_text("✅ Bot funcionando correctamente.")
-    else:
-        await update.message.reply_text("❌ No estás autorizado para usar este comando.")
-        await notificar_admins(
-            f"⚠️ Intento no autorizado detectado\n👤 {update.effective_user.full_name} ({user_id})\n💬 /start"
-        )
+    user = update.effective_user
+    message = update.effective_message
 
+    if user is None or message is None:
+        return  # No se puede procesar sin usuario o mensaje
+
+    user_id = user.id
+
+    if autorizado(user_id):
+        await message.reply_text("✅ Bot funcionando correctamente.")
+    else:
+        await message.reply_text("❌ No estás autorizado para usar este comando.")
+        await notificar_admins(
+            f"⚠️ Intento no autorizado detectado\n🧑 {user.first_name} {user.last_name or ''} ({user.id})"
+        )
 async def estado_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not autorizado(update.effective_user.id):
+    user = update.effective_user
+    message = update.effective_message
+
+    if user is None or message is None:
+        return
+
+    if not autorizado(user.id):
         return
 
     channels = load_json("data/channels.json")
-    logging.info("➡️ channels.json contiene: %s", channels)
+    logging.info("📘 channels.json contiene: %s", channels)
+
     fixed = CANALES_FIJOS
     now = datetime.now(pytz.timezone(ZONA_HORARIA)).strftime("%Y-%m-%d %H:%M:%S")
     users = USUARIOS_AUTORIZADOS
+
     estado = f"""📊 Estado del Bot
 🕒 Fecha y hora: {now}
-📢 Canales activos: {len([c for c in channels if c['activo']])}
-📌 Canales fijos: {len(fixed)}
-✅ Usuarios autorizados: {len(users)}
-""" + "\n".join([f"🔒 {u}" for u in users])
+📌 Canales activos: {len([c for c in channels if c['activo']])}
+📍 Canales fijos: {len(fixed)}
+🛡️ Usuarios autorizados: {len(users)}
+""" + "\n".join([f"🔐 {u}" for u in users])
 
-    await update.message.reply_text(estado)
+    await message.reply_text(estado)
 
 async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not autorizado(update.effective_user.id):
+    user = update.effective_user
+    message = update.effective_message
+
+    if user is None or message is None:
+        return
+
+    if not autorizado(user.id):
         return
 
     print(">>> Args recibidos:", context.args)
 
     try:
-        if len(context.args) < 3:
-            await update.message.reply_text(
-                "❗ Uso incorrecto. Formato: /agregar <canal_id> <nombre> <enlace>"
+        args = context.args or []
+
+        if len(args) < 3:
+            await message.reply_text(
+                "❗Uso incorrecto. Formato: /agregar <canal_id> <nombre> <enlace>"
             )
             return
 
-        canal_id = int(context.args[0])
-        nombre = context.args[1]
-        enlace = context.args[2]
+        canal_id = int(args[0])
+        nombre = args[1]
+        enlace = args[2]
 
-        await update.message.reply_text(
+        await message.reply_text(
             f"✅ Canal recibido:\nID: {canal_id}\nNombre: {nombre}\nEnlace: {enlace}"
         )
 
     except Exception as e:
-        await update.message.reply_text(f"❌ Error en agregar: {e}")
+        await message.reply_text(f"❌ Error en agregar: {e}")
         return
 
+    # Verificar blacklist
     blacklist = load_json("data/blacklist.json")
     for b in blacklist:
         if b["id"] == canal_id:
-            await update.message.reply_text(
+            await message.reply_text(
                 f"❌ Canal no agregado. En lista negra desde {b['desde']} hasta {b['hasta']}."
             )
             return
 
+    # Verificar si ya existe
     channels = load_json("data/channels.json")
     if any(c["id"] == canal_id for c in channels):
-        await update.message.reply_text("⚠️ El canal ya está agregado.")
+        await message.reply_text("⚠️ El canal ya está agregado.")
     else:
         channels.append({
             "id": canal_id,
@@ -102,11 +126,18 @@ async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "enlace": enlace,
             "activo": True
         })
+
         save_json("data/channels.json", channels)
-        await update.message.reply_text("✅ Canal agregado correctamente.")
+        await message.reply_text("✅ Canal agregado correctamente.")
 
 async def eliminar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not autorizado(update.effective_user.id):
+    user = update.effective_user
+    message = update.effective_message
+
+    if user is None or message is None:
+        return
+
+    if not autorizado(user.id):
         return
 
     canales = load_json("data/channels.json")
@@ -114,15 +145,18 @@ async def eliminar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton(f"{'✅' if c['activo'] else '❌'} {c['nombre']}", callback_data=f"toggle:{c['id']}")]
         for c in canales
     ]
-    keyboard.append([InlineKeyboardButton("💾 Guardar cambios", callback_data="guardar")])
 
-    await update.message.reply_text("Selecciona los canales a desactivar:", reply_markup=InlineKeyboardMarkup(keyboard))
+    keyboard.append([InlineKeyboardButton("📝 Guardar cambios", callback_data="guardar")])
+
+    await message.reply_text("Selecciona los canales a desactivar:", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def notificar_admins(msg):
     print(f"[ADMIN] {msg}")
 
 async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not autorizado(update.effective_user.id):
+    user = update.effective_user
+
+    if user is None or not autorizado(user.id):
         return
 
     channels = [c for c in load_json("data/channels.json") if c["activo"]]
@@ -139,11 +173,16 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             await context.bot.send_animation(
                 chat_id=ch["id"],
-                animation=encabezado["fileid"],
-                caption=encabezado["caption"],
+                animation=ENCABEZADO_FILEID,
+                caption=ENCABEZADO_CAPTION,
                 reply_markup=markup,
                 allow_sending_without_reply=True
             )
+            success += 1
+        except Exception:
+            failed += 1
+            ch["activo"] = False  # Desactiva canal fallido
+            
             success += 1
         except:
             failed += 1
@@ -161,7 +200,10 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await notificar_admins(f"⚠️ Canal {ch['nombre']} ({ch['id']}) fue castigado por remover la botonera o permisos.")
     
     save_json("data/channels.json", channels)
-    await update.message.reply_text(f"✅ Publicados: {success}, ❌ Fallidos: {failed}")
+    await context.bot.send_message(
+    chat_id=user.id,
+    text=f"✅ Publicados: {success}, ❌ Fallidos: {failed}"
+)
 
     encabezado = {
     "fileid": ENCABEZADO_FILEID,
@@ -169,64 +211,114 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
 }
 
 async def ver_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not autorizado(update.effective_user.id):
+    user = update.effective_user
+    message = update.effective_message
+
+    if user is None or message is None:
         return
 
-await context.bot.send_animation(
-    chat_id=ch["id"],
-    animation=ENCABEZADO_FILEID,
-    caption=ENCABEZADO_CAPTION,
-    reply_markup=markup,
-    allow_sending_without_reply=True
-)
+    if not autorizado(user.id):
+        return
+
+    try:
+        await context.bot.send_animation(
+            chat_id=user.id,
+            animation=ENCABEZADO_FILEID,
+            caption=ENCABEZADO_CAPTION,
+            allow_sending_without_reply=True
+        )
+    except Exception as e:
+        await message.reply_text(f"❌ Error al mostrar el encabezado: {e}")
 
 async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not autorizado(update.effective_user.id):
-        return
-    await update.message.reply_text("✅ Botonera eliminada con éxito (simulación).")
+    user = update.effective_user
+    message = update.effective_message
 
+    if user is None or message is None:
+        return
+
+    if not autorizado(user.id):
+        return
+
+    await message.reply_text("✅ Botonera eliminada con éxito (simulación).")
 
 async def autorizar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
+    user = update.effective_user
+    message = update.effective_message
+
+    if user is None or message is None:
+        return
+
+    user_id = user.id
     if not autorizado(user_id):
         return
 
     try:
-        nuevo_id = int(context.args[0])
+        args = context.args or []
+        nuevo_id = int(args[0])
     except (IndexError, ValueError):
-        await update.message.reply_text("Uso: /autorizar <user_id>")
+        await message.reply_text("Uso: /autorizar <user_id>")
         return
 
     if nuevo_id in USUARIOS_AUTORIZADOS:
-        await update.message.reply_text("✅ Este usuario ya está autorizado.")
+        await message.reply_text("✅ Este usuario ya está autorizado.")
         return
 
     USUARIOS_AUTORIZADOS.append(nuevo_id)
+
+    with open("data/autorizados.json", "w", encoding="utf-8") as f:
+        json.dump(USUARIOS_AUTORIZADOS, f)
+
+    await message.reply_text(f"✅ Usuario {nuevo_id} autorizado correctamente.")
 
     # Guardar en archivo
     with open("data/autorizados.json", "w", encoding="utf-8") as f:
         json.dump(USUARIOS_AUTORIZADOS, f)
 
-    await update.message.reply_text(f"✅ Usuario {nuevo_id} autorizado correctamente.")
+    await message.reply_text(f"✅ Usuario {nuevo_id} autorizado correctamente.")
 
 async def revocar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not autorizado(update.effective_user.id):
+    user = update.effective_user
+    message = update.effective_message
+
+    if user is None or message is None:
         return
+
+    if not autorizado(user.id):
+        return
+
     try:
-        uid = int(context.args[0])
-        users = load_json("data/authorized.json")
-        if uid in users:
-            users.remove(uid)
-            save_json("data/authorized.json", users)
-            await update.message.reply_text("✅ Usuario revocado.")
-        else:
-            await update.message.reply_text("⚠️ Usuario no estaba autorizado.")
-    except:
-        await update.message.reply_text("Uso: /revocar <user_id>")
+        args = context.args or []
+        uid = int(args[0])
+    except (IndexError, ValueError):
+        await message.reply_text("Uso: /revocar <user_id>")
+        return
+
+    users = load_json("data/autorizados.json")
+
+    if uid in users:
+        users.remove(uid)
+        save_json("data/autorizados.json", users)
+
+        # También actualiza la lista en memoria si es necesario
+        USUARIOS_AUTORIZADOS.clear()
+        USUARIOS_AUTORIZADOS.extend(users)
+
+        await message.reply_text(f"✅ Usuario {uid} revocado.")
+    else:
+        await message.reply_text("⚠️ Ese usuario no estaba autorizado.")
 
 async def listar_autorizados(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not autorizado(update.effective_user.id):
+    user = update.effective_user
+    message = update.effective_message
+
+    if user is None or message is None:
         return
-    users = load_json("data/authorized.json")
-    lista = "\n".join([f"🔒 {u}" for u in users])
-    await update.message.reply_text(f"Usuarios autorizados:\n{lista}")
+
+    if not autorizado(user.id):
+        return
+
+    users = load_json("data/autorizados.json")
+    lista = "\n".join([f"🔐 {u}" for u in users])
+
+    await message.reply_text(f"👤 Usuarios autorizados:\n{lista}")
