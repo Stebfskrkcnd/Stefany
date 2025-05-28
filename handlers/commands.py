@@ -91,8 +91,8 @@ async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         canal_id = lineas[0].strip()
-        enlace = lineas[1].strip()
-        nombre = "\n".join(lineas[2:]).strip()
+        nombre = lineas[1].strip()
+        enlace = "\n".join(lineas[2:]).strip()
 
         print(">>> Canal recibido:")
         print(f"id: {canal_id}")
