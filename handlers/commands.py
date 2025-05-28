@@ -75,7 +75,7 @@ async def estado_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    message = update.effective_message
+    message = update.effective_message  # Esto sí garantiza que no sea None
 
     if user is None or message is None:
         return
@@ -83,43 +83,37 @@ async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not autorizado(user.id):
         return
 
-    print(">>> Args recibidos:", context.args)
-
     try:
-        args = context.args or []
-
-        if len(args) < 3:
-            await message.reply_text(
-                "❗Uso incorrecto. Formato: /agregar <canal_id> <nombre> <enlace>"
-            )
+        texto = message.text or ""
+        lineas = texto.strip().split("\n")[1:]
+        if len(lineas) < 3:
+            await message.reply_text("❗Uso incorrecto. Formato esperado:\n/agregar\n<canal_id>\n<enlace>\n<nombre>")
             return
 
-        canal_id = int(args[0])
-        nombre = args[1]
-        enlace = args[2]
+        canal_id = lineas[0].strip()
+        enlace = lineas[1].strip()
+        nombre = "\n".join(lineas[2:]).strip()
 
-        await message.reply_text(
-            f"✅ Canal recibido:\nID: {canal_id}\nNombre: {nombre}\nEnlace: {enlace}"
-        )
+        print(">>> Canal recibido:")
+        print(f"id: {canal_id}")
+        print(f"enlace: {enlace}")
+        print(f"nombre: {nombre}")
 
-    except Exception as e:
-        await message.reply_text(f"❌ Error en agregar: {e}")
-        return
+        # Verificar blacklist
+        blacklist = load_json("data/blacklist.json")
+        for b in blacklist:
+            if b["id"] == canal_id:
+                await message.reply_text(
+                    f"❌ Canal no agregado. En lista negra desde {b['desde']} hasta {b['hasta']}."
+                )
+                return
 
-    # Verificar blacklist
-    blacklist = load_json("data/blacklist.json")
-    for b in blacklist:
-        if b["id"] == canal_id:
-            await message.reply_text(
-                f"❌ Canal no agregado. En lista negra desde {b['desde']} hasta {b['hasta']}."
-            )
+        # Verificar si ya existe
+        channels = load_json("data/channels.json")
+        if any(c["id"] == canal_id for c in channels):
+            await message.reply_text("⚠️ El canal ya está agregado.")
             return
 
-    # Verificar si ya existe
-    channels = load_json("data/channels.json")
-    if any(c["id"] == canal_id for c in channels):
-        await message.reply_text("⚠️ El canal ya está agregado.")
-    else:
         channels.append({
             "id": canal_id,
             "nombre": nombre,
@@ -129,6 +123,9 @@ async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         save_json("data/channels.json", channels)
         await message.reply_text("✅ Canal agregado correctamente.")
+
+    except Exception as e:
+        await message.reply_text(f"❌ Error en agregar: {e}")
 
 async def eliminar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
