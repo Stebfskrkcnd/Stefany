@@ -4,14 +4,17 @@ from utils.helpers import load_json, save_json
 
 async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
+    if not query:
+        return
+
     data = query.data
+    if not data:
+        return
     canales = load_json("data/channels.json")
 
     if data.startswith("toggle:"):
         canal_id = int(data.split(":")[1])
-        for c in canales:
-            if c["id"] == canal_id:
-                c["activo"] = not c["activo"]
+        canales = [c for c in canales if c["id"] != canal_id]  # 🔥 elimina completamente el canal
         save_json("data/channels.json", canales)
 
         keyboard = [
