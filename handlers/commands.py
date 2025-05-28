@@ -164,7 +164,6 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     botones = [[InlineKeyboardButton(c["nombre"], url=c["enlace"])] for c in channels]
     botones += [[InlineKeyboardButton(c["nombre"], url=c["enlace"])] for c in CANALES_FIJOS]
-
     markup = InlineKeyboardMarkup(botones)
 
     success, failed = 0, 0
@@ -172,38 +171,36 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for ch in channels:
         try:
             await context.bot.send_animation(
-                chat_id=ch["id"],
-                animation=ENCABEZADO_FILEID,
-                caption=ENCABEZADO_CAPTION,
-                reply_markup=markup,
-                allow_sending_without_reply=True
+            chat_id=ch["id"],
+            animation=ENCABEZADO_FILEID,
+            caption=ENCABEZADO_CAPTION,
+            reply_markup=markup,
+            allow_sending_without_reply=True
             )
-            success += 1
+            success += 1  # <-- esto debe estar dentro del try, bien indentado
         except Exception:
             failed += 1
-            ch["activo"] = False  # Desactiva canal fallido
-            
-            success += 1
-        except:
-            failed += 1
-            ch["activo"] = False
-            now = datetime.now(pytz.timezone(ZONA_HORARIA))
-            hasta = now + timedelta(days=90)
-            blacklist = load_json("data/blacklist.json")
-            blacklist.append({
-                "id": ch["id"],
-                "nombre": ch["nombre"],
-                "desde": now.strftime("%Y-%m-%d"),
-                "hasta": hasta.strftime("%Y-%m-%d")
-            })
-            save_json("data/blacklist.json", blacklist)
-            await notificar_admins(f"⚠️ Canal {ch['nombre']} ({ch['id']}) fue castigado por remover la botonera o permisos.")
+        ch["activo"] = False
+        now = datetime.now(pytz.timezone(ZONA_HORARIA))
+        hasta = now + timedelta(days=90)
+        blacklist = load_json("data/blacklist.json")
+        blacklist.append({
+            "id": ch["id"],
+            "nombre": ch["nombre"],
+            "desde": now.strftime("%Y-%m-%d"),
+            "hasta": hasta.strftime("%Y-%m-%d")
+        })
+        save_json("data/blacklist.json", blacklist)
+        await notificar_admins(
+            f"⚠️ Canal {ch['nombre']} ({ch['id']}) fue castigado por remover la botonera o no permitir publicación."
+        )
     
     save_json("data/channels.json", channels)
-    await context.bot.send_message(
-    chat_id=user.id,
-    text=f"✅ Publicados: {success}, ❌ Fallidos: {failed}"
-)
+
+    if update.message:
+        await update.message.reply_text(
+        f"✅ Publicados: {success}, ❌ Fallidos: {failed}"
+    )
 
     encabezado = {
     "fileid": ENCABEZADO_FILEID,
