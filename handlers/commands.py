@@ -159,11 +159,20 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user is None or not autorizado(user.id):
         return
 
-    channels = [c for c in load_json("data/channels.json") if c["activo"]]
+    channels = [
+        c for c in load_json("data/channels.json")
+        if c["activo"] and c["id"] not in [cf["id"] for cf in CANALES_FIJOS]
+    ]
     random.shuffle(channels)
+    botones = [
+        [InlineKeyboardButton(c["nombre"], url=c["enlace"])]
+        for c in channels
+    ]
+    botones += [
+        [InlineKeyboardButton(c["nombre"], url=c["enlace"])]
+        for c in CANALES_FIJOS
+    ]
 
-    botones = [[InlineKeyboardButton(c["nombre"], url=c["enlace"])] for c in channels]
-    botones += [[InlineKeyboardButton(c["nombre"], url=c["enlace"])] for c in CANALES_FIJOS]
     markup = InlineKeyboardMarkup(botones)
 
     success, failed = 0, 0
