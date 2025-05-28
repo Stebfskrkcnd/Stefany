@@ -1,4 +1,7 @@
 import os
+import json
+from telegram import Update
+from telegram.ext import ContextTypes
 import logging
 from telegram.ext import (
     ApplicationBuilder,
@@ -9,9 +12,8 @@ from telegram.ext import (
     filters
 )
 from telegram.error import TelegramError
-from telegram import Update
-from telegram.ext import ContextTypes
 from utils.helpers import load_json, save_json
+from config import USUARIOS_AUTORIZADOS
 
 # Configuración de logging
 logging.basicConfig(
@@ -53,7 +55,22 @@ async def callback_guardar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_json("data/channels.json", canales)
 
     await query.edit_message_text("✅ Cambios guardados.")
-    
+
+def autorizado(user_id: int) -> bool:
+    return user_id in USUARIOS_AUTORIZADOS
+
+async def ver_channels(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    message = update.message or update.effective_message
+
+    if user is None or not autorizado(user.id):
+        return
+
+    canales = load_json("data/channels.json")
+    texto = json.dumps(canales, indent=2, ensure_ascii=False)
+    if message:
+        await message.reply_text(f"📁 Contenido de channels.json:\n\n{texto}")
+
 # Registro de handlers
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("estado", estado_bot))
@@ -66,6 +83,7 @@ app.add_handler(CommandHandler("revocar", revocar))
 app.add_handler(CommandHandler("listar", listar_autorizados))
 app.add_handler(CallbackQueryHandler(callback_handler))
 app.add_handler(CallbackQueryHandler(callback_guardar, pattern="^guardar$"))
+app.add_handler(CommandHandler("verchannels", ver_channels))
 
 # Manejo de errores
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
