@@ -57,6 +57,9 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
 
 app.add_error_handler(error_handler)
 
+ENCABEZADO_FILEID = os.getenv("ENCABEZADO_FILEID", "")
+ENCABEZADO_CAPTION = os.getenv("ENCABEZADO_CAPTION", "")
+
 # Entry point final
 if __name__ == "__main__":
     print("✅ Bot ejecutándose correctamente...")

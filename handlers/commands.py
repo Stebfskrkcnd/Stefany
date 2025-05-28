@@ -3,6 +3,7 @@ import os, json
 import pytz
 import random
 import logging
+from config import ENCABEZADO_FILEID, ENCABEZADO_CAPTION
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime, timedelta
 from telegram import Update
@@ -19,8 +20,6 @@ def cargar_autorizados():
 
 USUARIOS_AUTORIZADOS = load_json("data/autorizados.json", [])
 ZONA_HORARIA = os.getenv("ZONA_HORARIA", "America/New_York")
-
-#para hacr deploy
 
 # Si quieres usar CANALES_FIJOS como JSON string desde una variable:
 import json
@@ -164,17 +163,22 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_json("data/channels.json", channels)
     await update.message.reply_text(f"✅ Publicados: {success}, ❌ Fallidos: {failed}")
 
-    encabezado = get_encabezado()
+    encabezado = {
+    "fileid": ENCABEZADO_FILEID,
+    "caption": ENCABEZADO_CAPTION
+}
 
 async def ver_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not autorizado(update.effective_user.id):
         return
 
-    await context.bot.send_animation(
-        chat_id=update.effective_chat.id,
-        animation=os.getenv("ENCABEZADO_FILEID"),
-        caption=os.getenv("ENCABEZADO_CAPTION")
-    )
+await context.bot.send_animation(
+    chat_id=ch["id"],
+    animation=ENCABEZADO_FILEID,
+    caption=ENCABEZADO_CAPTION,
+    reply_markup=markup,
+    allow_sending_without_reply=True
+)
 
 async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not autorizado(update.effective_user.id):
