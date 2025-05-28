@@ -179,30 +179,31 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     for ch in channels:
         try:
-            await context.bot.send_animation(
-            chat_id=ch["id"],
-            animation=ENCABEZADO_FILEID,
-            caption=ENCABEZADO_CAPTION,
-            reply_markup=markup,
-            allow_sending_without_reply=True
+            msg = await context.bot.send_animation(
+                chat_id=ch["id"],
+                animation=ENCABEZADO_FILEID,
+                caption=ENCABEZADO_CAPTION,
+                reply_markup=markup,
+                allow_sending_without_reply=True
             )
-            success += 1  # <-- esto debe estar dentro del try, bien indentado
+            ch["message_id"] = msg.message_id  # 🔴 Guarda el ID del mensaje
+            success += 1
         except Exception:
             failed += 1
-        ch["activo"] = False
-        now = datetime.now(pytz.timezone(ZONA_HORARIA))
-        hasta = now + timedelta(days=90)
-        blacklist = load_json("data/blacklist.json")
-        blacklist.append({
-            "id": ch["id"],
-            "nombre": ch["nombre"],
-            "desde": now.strftime("%Y-%m-%d"),
-            "hasta": hasta.strftime("%Y-%m-%d")
-        })
-        save_json("data/blacklist.json", blacklist)
-        await notificar_admins(
-            f"⚠️ Canal {ch['nombre']} ({ch['id']}) fue castigado por remover la botonera o no permitir publicación."
-        )
+            ch["activo"] = False
+            now = datetime.now(pytz.timezone(ZONA_HORARIA))
+            hasta = now + timedelta(days=90)
+            blacklist = load_json("data/blacklist.json")
+            blacklist.append({
+                "id": ch["id"],
+                "nombre": ch["nombre"],
+                "desde": now.strftime("%Y-%m-%d"),
+                "hasta": hasta.strftime("%Y-%m-%d")
+            })
+            save_json("data/blacklist.json", blacklist)
+            await notificar_admins(
+                f"⚠️ Canal {ch['nombre']} ({ch['id']}) fue castigado por remover la botonera o no permitir publicación."
+            )
     
     save_json("data/channels.json", channels)
 
@@ -246,7 +247,21 @@ async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not autorizado(user.id):
         return
 
-    await message.reply_text("✅ Botonera eliminada con éxito (simulación).")
+    channels = load_json("data/channels.json")
+
+    success = 0
+    for ch in channels:
+        if ch.get("activo") and "message_id" in ch:
+            try:
+                await context.bot.delete_message(chat_id=ch["id"], message_id=ch["message_id"])
+                success += 1
+            except:
+                pass  # Ya fue eliminada manualmente
+            ch.pop("message_id", None)  # Limpia aunque falle
+
+    save_json("data/channels.json", channels)
+
+    await message.reply_text(f"🗑 Botonera eliminada de {success} canales.")
 
 async def autorizar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
