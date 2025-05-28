@@ -9,6 +9,9 @@ from telegram.ext import (
     filters
 )
 from telegram.error import TelegramError
+from telegram import Update
+from telegram.ext import ContextTypes
+from utils.helpers import load_json, save_json
 
 # Configuración de logging
 logging.basicConfig(
@@ -39,6 +42,18 @@ from handlers.callbacks import callback_handler
 # Crear app
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 
+async def callback_guardar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return  # Previene errores si no es un callback
+
+    await query.answer()
+
+    canales = load_json("data/channels.json")
+    save_json("data/channels.json", canales)
+
+    await query.edit_message_text("✅ Cambios guardados.")
+    
 # Registro de handlers
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("estado", estado_bot))
@@ -50,6 +65,7 @@ app.add_handler(CommandHandler("autorizar", autorizar))
 app.add_handler(CommandHandler("revocar", revocar))
 app.add_handler(CommandHandler("listar", listar_autorizados))
 app.add_handler(CallbackQueryHandler(callback_handler))
+app.add_handler(CallbackQueryHandler(callback_guardar, pattern="^guardar$"))
 
 # Manejo de errores
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
