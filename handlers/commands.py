@@ -7,6 +7,7 @@ from config import ENCABEZADO_FILEID, ENCABEZADO_CAPTION, PATH_BLACKLIST_JSON # 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime, timedelta
 from telegram import Update
+from telegram import Message
 from telegram import InputMediaAnimation
 from telegram.ext import ContextTypes
 from utils.helpers import load_json, save_json
@@ -278,15 +279,16 @@ async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await message.reply_text(f"🗑 Botonera eliminada de {success} canales.")
 
 async def descastigar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    message = update.message
-    if message is None:
+    message = update.message or (update.callback_query.message if update.callback_query else None)
+    if not isinstance(message, Message):
         return
+
     user = update.effective_user
     if user is None or user.id not in USUARIOS_AUTORIZADOS:
-            return await message.reply_text("❌ No estás autorizado.")
+        return await message.reply_text("❌ No estás autorizado.")
 
     if not context.args:
-            return await message.reply_text("Uso: /descastigar <id del canal>")
+        return await message.reply_text("Uso: /descastigar <id del canal>")
 
     canal_id = context.args[0]
 
