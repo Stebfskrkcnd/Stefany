@@ -162,6 +162,8 @@ async def notificar_admins(msg):
 async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
 
+    print("✅ Entró a publicar_botonera")
+    
     if user is None or not autorizado(user.id):
         return
 
