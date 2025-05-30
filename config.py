@@ -3,7 +3,7 @@ import json
 
 # Cargar token
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-
+PATH_BLACKLIST_JSON = "data/blacklist.json"
 TOKEN = os.getenv("GIT_TOKEN", "")
 
 print("TOKEN OK:", TOKEN[:8])  # Solo para verificar que lo cargó
