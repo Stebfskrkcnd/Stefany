@@ -1,3 +1,4 @@
+print("🚀 BOT INICIADO DESDE Railway")
 import os
 import json
 from telegram import Update
