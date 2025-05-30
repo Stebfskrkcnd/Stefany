@@ -278,28 +278,34 @@ async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await message.reply_text(f"🗑 Botonera eliminada de {success} canales.")
 
+print("⚙️ Ejecutando /descastigar")
 async def descastigar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.message or (update.callback_query.message if update.callback_query else None)
     if not isinstance(message, Message):
         return
-
+    
     user = update.effective_user
     if user is None or user.id not in USUARIOS_AUTORIZADOS:
         return await message.reply_text("❌ No estás autorizado.")
-
+    
     if not context.args:
         return await message.reply_text("Uso: /descastigar <id del canal>")
 
-    canal_id = context.args[0]
+    try:
+        canal_id = context.args[0]
 
-    blacklist = load_json("data/blacklist.json", [])
-    nueva_blacklist = [c for c in blacklist if str(c["id"]) != canal_id]
+        blacklist = load_json("data/blacklist.json", [])
+        nueva_blacklist = [c for c in blacklist if str(c["id"]) != canal_id]
 
-    if len(blacklist) == len(nueva_blacklist):
-        return await message.reply_text("⚠️ Ese canal no estaba en la blacklist.")
+        if len(blacklist) == len(nueva_blacklist):
+            return await message.reply_text("⚠️ Ese canal no estaba en la blacklist.")
 
-    save_json("data/blacklist.json", nueva_blacklist)
-    await message.reply_text("✅ Canal removido de la blacklist.")
+        save_json("data/blacklist.json", nueva_blacklist)
+        await message.reply_text("✅ Canal removido de la blacklist.")
+
+    except Exception as e:
+        print("⚠️ EXCEPCIÓN en /descastigar:", e)
+        return await message.reply_text("❌ Error inesperado al intentar descastigar.")
 
 async def ver_blacklist(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = getattr(update, "message", None) or getattr(getattr(update, "callback_query", None), "message", None)
