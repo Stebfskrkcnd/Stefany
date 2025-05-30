@@ -163,7 +163,8 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
 
     print("✅ Entró a publicar_botonera")
-    
+    import uuid
+    print("🆔 ID de instancia:", uuid.uuid4())
     if user is None or not autorizado(user.id):
         return
 
