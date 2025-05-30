@@ -211,12 +211,26 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await message.reply_text(
         f"✅ Publicados: {success}, ❌ Fallidos: {failed}"
     )
+        
+    for ch in channels:
+        try:
+            msg = await context.bot.send_animation(
+                chat_id=ch["id"],
+                animation=ENCABEZADO_FILEID,
+                caption=ENCABEZADO_CAPTION,
+                reply_markup=markup,
+                allow_sending_without_reply=True
+            )
 
-    encabezado = {
-    "fileid": ENCABEZADO_FILEID,
-    "caption": ENCABEZADO_CAPTION
-}
+            ch["message_id"] = msg.message_id  # Guarda el ID del mensaje
+            success += 1
 
+        except Exception as e:
+            logging.exception(f"❌ Error publicando en canal {ch['nombre']} ({ch['id']})")
+            print("⚠️ EXCEPCIÓN:", e)
+            failed += 1
+            ch["activo"] = False
+         
 async def ver_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     message = update.effective_message
