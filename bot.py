@@ -74,6 +74,8 @@ async def ver_channels(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if message:
         await message.reply_text(f"📁 Contenido de channels.json:\n\n{texto}")
 
+print("📌 Handler de /publicar registrado")
+
 # Registro de handlers
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("estado", estado_bot))
