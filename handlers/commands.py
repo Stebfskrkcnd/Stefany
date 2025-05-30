@@ -162,7 +162,7 @@ async def notificar_admins(msg):
 async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
 
-    print("✅ Entró a publicar_botonera")
+    print(f"✅ Entró a publicar_botonera a las {datetime.now().strftime('%H:%M:%S')}")
     import uuid
     print("🆔 ID de instancia:", uuid.uuid4())
     if user is None or not autorizado(user.id):
