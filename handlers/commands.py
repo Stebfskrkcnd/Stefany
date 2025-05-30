@@ -179,6 +179,7 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     for ch in channels:
         try:
+            print(f"➡️ Enviando a canal: {ch['nombre']} ({ch['id']}) con enlace: {ch['enlace']}")
             msg = await context.bot.send_animation(
                 chat_id=ch["id"],
                 animation=ENCABEZADO_FILEID,
@@ -190,6 +191,7 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
             success += 1
 
         except Exception as e:
+            print(f"❌ EXCEPCIÓN al enviar a {ch['nombre']} ({ch['id']}):", e)
             logging.exception(f"❌ Error publicando en canal {ch['nombre']} ({ch['id']})")
             print("⚠️ EXCEPCIÓN:", e)
             failed += 1
