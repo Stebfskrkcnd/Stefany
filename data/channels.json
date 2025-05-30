@@ -10,5 +10,11 @@
     "nombre": "Canal de Prueba✅",
     "enlace": "https://t.me/canal_prueba25",
     "activo": false
+  },
+  {
+    "id": "-1002557318463",
+    "nombre": "https://t.me/canal_prueba25",
+    "enlace": "Canal de prueba 🆗",
+    "activo": true
   }
 ]
