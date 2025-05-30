@@ -1,9 +1,9 @@
 import os, json
-
+from datetime import datetime
 import pytz
 import random
 import logging
-from config import ENCABEZADO_FILEID, ENCABEZADO_CAPTION
+from config import ENCABEZADO_FILEID, ENCABEZADO_CAPTION, PATH_BLACKLIST_JSON # type: ignore
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime, timedelta
 from telegram import Update
@@ -185,12 +185,16 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             ch["message_id"] = msg.message_id  # 🔴 Guarda el ID del mensaje
             success += 1
-        except Exception:
+
+        except Exception as e:
+            logging.exception(f"❌ Error publicando en canal {ch['id']}: {e}")
             failed += 1
             ch["activo"] = False
+
             now = datetime.now(pytz.timezone(ZONA_HORARIA))
             hasta = now + timedelta(days=90)
-            blacklist = load_json("data/blacklist.json")
+
+            blacklist = load_json("data/blacklist.json", [])
             blacklist.append({
                 "id": ch["id"],
                 "nombre": ch["nombre"],
@@ -198,14 +202,13 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "hasta": hasta.strftime("%Y-%m-%d")
             })
             save_json("data/blacklist.json", blacklist)
+
             await notificar_admins(
                 f"⚠️ Canal {ch['nombre']} ({ch['id']}) fue castigado por remover la botonera o no permitir publicación."
-            )
-    
-    save_json("data/channels.json", channels)
-
+        )
     if update.message:
-        await update.message.reply_text(
+        message = update.message #✅ Esta linea lo arregla
+        await message.reply_text(
         f"✅ Publicados: {success}, ❌ Fallidos: {failed}"
     )
 
@@ -259,6 +262,49 @@ async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_json("data/channels.json", channels)
 
     await message.reply_text(f"🗑 Botonera eliminada de {success} canales.")
+
+async def descastigar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    message = update.message
+    if message is None:
+        return
+    user = update.effective_user
+    if user is None or user.id not in USUARIOS_AUTORIZADOS:
+            return await message.reply_text("❌ No estás autorizado.")
+
+    if not context.args:
+            return await message.reply_text("Uso: /descastigar <id del canal>")
+
+    canal_id = context.args[0]
+
+    blacklist = load_json("data/blacklist.json", [])
+    nueva_blacklist = [c for c in blacklist if str(c["id"]) != canal_id]
+
+    if len(blacklist) == len(nueva_blacklist):
+        return await message.reply_text("⚠️ Ese canal no estaba en la blacklist.")
+
+    save_json("data/blacklist.json", nueva_blacklist)
+    await message.reply_text("✅ Canal removido de la blacklist.")
+
+async def ver_blacklist(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    message = getattr(update, "message", None) or getattr(getattr(update, "callback_query", None), "message", None)
+    if message is None:
+        return
+
+    blacklist = load_json("data/blacklist.json", [])
+
+    if not blacklist:
+        return await message.reply_text("✅ No hay canales en la blacklist.")
+
+    texto = "🚫 <b>Canales castigados actualmente:</b>\n\n"
+    for c in blacklist:
+        texto += (
+            f"🔹 <b>{c['nombre']}</b>\n"
+            f"🆔 <code>{c['id']}</code>\n"
+            f"📅 Desde: <code>{c['desde']}</code>\n"
+            f"⏳ Hasta: <code>{c['hasta']}</code>\n\n"
+        )
+
+    await message.reply_text(texto, parse_mode="HTML")
 
 async def autorizar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user

@@ -2,7 +2,7 @@ import json
 import os
 import subprocess
 import logging
-
+import traceback
 import json, os, requests, logging
 
 GITHUB_API = "https://api.github.com"
@@ -18,7 +18,7 @@ def save_json(path, data):
             json.dump(data, f, indent=2, ensure_ascii=False)
 
         logging.info(f"✅ JSON guardado localmente en {os.path.abspath(path)}")
-
+    
         # Lee contenido del archivo
         with open(path, "r", encoding="utf-8") as f:
             content = f.read()
@@ -50,7 +50,8 @@ def save_json(path, data):
             logging.error(f"❌ Error al hacer push: {r.text}")
 
     except Exception as e:
-        logging.error(f"❌ Error guardando y haciendo push: {e}")
+        logging.error("❌ Error guardando y haciendo push:")
+        logging.error(traceback.format_exc())
 
 def load_json(path, default=None):
     try:

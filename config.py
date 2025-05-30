@@ -4,6 +4,10 @@ import json
 # Cargar token
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
+TOKEN = os.getenv("GIT_TOKEN", "")
+
+print("TOKEN OK:", TOKEN[:8])  # Solo para verificar que lo cargó
+
 # Cargar usuarios autorizados desde string: "12345;67890"
 USUARIOS_AUTORIZADOS = [
     int(uid) for uid in os.getenv("USUARIOS_AUTORIZADOS", "").split(";") if uid.strip().isdigit()
