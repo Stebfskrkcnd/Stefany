@@ -59,7 +59,14 @@ async def estado_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     channels = load_json("data/channels.json")
+    blacklist = load_json("data/blacklist.json", [])
     logging.info("📘 channels.json contiene: %s", channels)
+
+    # Obtener IDs castigados como strings
+    blacklist_ids = [str(c["id"]) for c in blacklist]
+
+    # Solo canales activos que no estén en la blacklist
+    activos = [c for c in channels if c.get("activo") and str(c["id"]) not in blacklist_ids]
 
     fixed = CANALES_FIJOS
     now = datetime.now(pytz.timezone(ZONA_HORARIA)).strftime("%Y-%m-%d %H:%M:%S")
@@ -67,9 +74,9 @@ async def estado_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     estado = f"""📊 Estado del Bot
 🕒 Fecha y hora: {now}
-📌 Canales activos: {len([c for c in channels if c['activo']])}
-📍 Canales fijos: {len(fixed)}
-🛡️ Usuarios autorizados: {len(users)}
+✅ Canales activos: {len(activos)}
+📌 Canales fijos: {len(fixed)}
+👥 Usuarios autorizados: {len(users)}
 """ + "\n".join([f"🔐 {u}" for u in users])
 
     await message.reply_text(estado)
