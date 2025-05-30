@@ -4,6 +4,7 @@ import pytz
 import random
 import logging
 from config import ENCABEZADO_FILEID, ENCABEZADO_CAPTION, PATH_BLACKLIST_JSON # type: ignore
+from typing import cast
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime, timedelta
 from telegram import Update
@@ -254,7 +255,14 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
             print("🔍 Error específico al enviar animación:", e)
             failed += 1
             ch["activo"] = False
-         
+
+        message = update.message or (update.callback_query.message if update.callback_query else None)
+        message = cast(Message, message) if message else None
+
+        if message:
+            await message.reply_text(f"✅ Publicados: {success}, ❌ Fallidos: {failed}")
+        save_json("data/channels.json", channels)
+
 async def ver_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     message = update.effective_message
