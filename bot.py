@@ -14,6 +14,7 @@ from telegram.ext import (
 from telegram.error import TelegramError
 from utils.helpers import load_json, save_json
 from config import USUARIOS_AUTORIZADOS
+from handlers.commands import ver_blacklist
 
 # Configuración de logging
 logging.basicConfig(
@@ -84,6 +85,7 @@ app.add_handler(CommandHandler("listar", listar_autorizados))
 app.add_handler(CallbackQueryHandler(callback_handler))
 app.add_handler(CallbackQueryHandler(callback_guardar, pattern="^guardar$"))
 app.add_handler(CommandHandler("verchannels", ver_channels))
+app.add_handler(CommandHandler("blacklist", ver_blacklist))
 
 # Manejo de errores
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
