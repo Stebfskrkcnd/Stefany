@@ -175,6 +175,8 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     success, failed = 0, 0
 
+    blacklist = load_json("data/blacklist.json", [])
+
     for ch in channels:
         try:
             msg = await context.bot.send_animation(
@@ -188,14 +190,24 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
             success += 1
 
         except Exception as e:
-            logging.exception(f"❌ Error publicando en canal {ch['id']}: {e}")
+            logging.exception(f"❌ Error publicando en canal {ch['nombre']} ({ch['id']})")
+            print("⚠️ EXCEPCIÓN:", e)
             failed += 1
             ch["activo"] = False
 
             now = datetime.now(pytz.timezone(ZONA_HORARIA))
             hasta = now + timedelta(days=90)
 
-            blacklist = load_json("data/blacklist.json", [])
+            # 🛡️ Solo castiga si no está ya en la blacklist
+            if not any(str(c["id"]) == str(ch["id"]) for c in blacklist):
+                ch["desde"] = now.strftime("%Y-%m-%d")
+                ch["hasta"] = hasta.strftime("%Y-%m-%d")
+                blacklist.append(ch)
+                save_json("data/blacklist.json", blacklist)
+                await notificar_admins(
+                    f"⚠️ Canal {ch['nombre']} ({ch['id']}) fue castigado por fallo al enviar."
+                )
+
             blacklist.append({
                 "id": ch["id"],
                 "nombre": ch["nombre"],
