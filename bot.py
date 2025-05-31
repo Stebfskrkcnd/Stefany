@@ -49,20 +49,20 @@ app = ApplicationBuilder().token(BOT_TOKEN).build()
 
 async def callback_guardar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    if not query or not query.from_user:
-        return
-    user = query.from_user
+    user = query.from_user # type: ignore
 
-    if not autorizado(user.id):
-        return await query.answer("❌ No estás autorizad@", show_alert=True)
+    if user is None or not autorizado(user.id):
+        return await query.answer("❌ No estás autorizado.", show_alert=True) # type: ignore
 
-    # Carga y filtra los canales que NO están marcados con "eliminar": true
+    # ✅ Carga los canales y filtra los que NO están marcados para eliminar
     canales = load_json("data/channels.json")
     canales_filtrados = [c for c in canales if not c.get("eliminar")]
 
+    # 💾 Guarda el nuevo archivo sin los canales marcados
     save_json("data/channels.json", canales_filtrados)
-    await query.answer("✅ Cambios guardados.")
-    await query.edit_message_text("✅ Cambios guardados correctamente.")
+
+    await query.answer("✅ Cambios guardados.") # type: ignore
+    await query.edit_message_text("✅ Cambios guardados correctamente.") # type: ignore
 
 def autorizado(user_id: int) -> bool:
     return user_id in USUARIOS_AUTORIZADOS
@@ -81,14 +81,12 @@ async def ver_channels(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    print(f"✏️ Callback recibido: {query.data}")
+    print(f"✏️ Callback recibido: {query.data}") # type: ignore
 
     if not query or not query.from_user:
         return
 
     user = query.from_user
-    print(f"👤 Usuario que pulsó el botón: {user.id}")
-
     if not autorizado(user.id):
         return await query.answer("❌ No estás autorizado.", show_alert=True)
 
@@ -102,21 +100,20 @@ async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYP
         return await query.answer("⚠️ ID inválido.", show_alert=True)
 
     canales = load_json("data/channels.json")
-    encontrados = 0
+    encontrado = False
 
     for canal in canales:
         if canal["id"] == canal_id:
             canal["eliminar"] = True
-            encontrados += 1
+            encontrado = True
             break
 
-    save_json("data/channels.json", canales)
+    if not encontrado:
+        return await query.answer("⚠️ Canal no encontrado.", show_alert=True)
 
-    if encontrados:
-        await query.answer("✅ Canal marcado para eliminar.")
-        await query.edit_message_text("✅ Canal marcado. Pulsa 📝 Guardar cambios para aplicar.")
-    else:
-        await query.answer("⚠️ Canal no encontrado.", show_alert=True)
+    save_json("data/channels.json", canales)
+    await query.answer("✅ Canal marcado para eliminar.")
+    await query.edit_message_text("📝 Cambios pendientes. Pulsa 'Guardar cambios' para aplicar.")
 
 # Registro de handlers
 app.add_handler(CommandHandler("start", start))
