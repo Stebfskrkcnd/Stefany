@@ -2,7 +2,6 @@ import os
 import json
 from utils.helpers import load_json
 
-USUARIOS_AUTORIZADOS = load_json("data/autorizados.json")
 # Cargar token
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 PATH_BLACKLIST_JSON = "data/blacklist.json"
