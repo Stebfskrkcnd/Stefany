@@ -168,39 +168,6 @@ async def eliminar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(botones)
     await message.reply_text("🗑️ Selecciona los canales a eliminar:", reply_markup=reply_markup)
 
-async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print("🧪 Entró al handler eliminar_canal_boton")  # <- línea de prueba
-    query = update.callback_query
-
-    if not query:
-        print("❌ query es None")
-        return
-    if not query.from_user:
-        print("❌ query.from_user es None")
-        return
-
-    user = query.from_user
-    print(f"👤 Usuario que pulsó el botón: {user.id}")
-
-    if not autorizado(user.id):
-        return await query.answer("❌ No estás autorizado.", show_alert=True)
-
-    data = query.data
-    if not data or not data.startswith("eliminar_canal_"):
-        return await query.answer("⚠️ Acción inválida.", show_alert=True)
-
-    try:
-        canal_id = int(data.replace("eliminar_canal_", ""))
-    except ValueError:
-        return await query.answer("⚠️ ID inválido.", show_alert=True)
-
-    canales = load_json("data/channels.json")
-    canales = [c for c in canales if c["id"] != canal_id]
-    save_json("data/channels.json", canales)
-    print(f"🧪 Data recibida en callback: {query.data}")
-    await query.answer("✅ Canal eliminado.")
-    await query.edit_message_text("✅ Canal eliminado correctamente.")
-
 async def notificar_admins(msg):
     print(f"[ADMIN] {msg}")
 
