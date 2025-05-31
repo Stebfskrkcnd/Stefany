@@ -169,6 +169,7 @@ async def eliminar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await message.reply_text("🗑️ Selecciona los canales a eliminar:", reply_markup=reply_markup)
 
 async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print("🪓 Callback de eliminar_canal_boton activado")
     query = update.callback_query
 
     if not query or not query.from_user:
@@ -191,7 +192,7 @@ async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYP
     canales = load_json("data/channels.json")
     canales = [c for c in canales if c["id"] != canal_id]
     save_json("data/channels.json", canales)
-
+    print(f"🧪 Data recibida en callback: {query.data}")
     await query.answer("✅ Canal eliminado.")
     await query.edit_message_text("✅ Canal eliminado correctamente.")
 
