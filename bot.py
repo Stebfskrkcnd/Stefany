@@ -112,8 +112,11 @@ async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYP
         return await query.answer("⚠️ Canal no encontrado.", show_alert=True)
 
     save_json("data/channels.json", canales)
-    await query.answer("✅ Canal marcado para eliminar.")
-    await query.edit_message_text("📝 Cambios pendientes. Pulsa 'Guardar cambios' para aplicar.")
+
+    await query.answer("✅ Canal marcado para eliminar.", show_alert=False)
+    await query.edit_message_caption(
+    caption="📝 Cambios pendientes. Pulsa 'Guardar cambios' para aplicar."
+)
 
 # Registro de handlers
 app.add_handler(CommandHandler("start", start))
