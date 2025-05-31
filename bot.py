@@ -14,7 +14,7 @@ from telegram.ext import (
 )
 from telegram.error import TelegramError
 from utils.helpers import load_json, save_json
-from config import USUARIOS_AUTORIZADOS
+from config import USUARIOS_AUTORIZADOS 
 from handlers.commands import ver_blacklist
 from handlers.commands import descastigar 
 

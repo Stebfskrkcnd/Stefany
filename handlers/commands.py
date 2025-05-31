@@ -20,7 +20,7 @@ def cargar_autorizados():
     except FileNotFoundError:
         return []
 
-USUARIOS_AUTORIZADOS = load_json("data/autorizados.json", [])
+from config import USUARIOS_AUTORIZADOS 
 ZONA_HORARIA = os.getenv("ZONA_HORARIA", "America/New_York")
 
 # Si quieres usar CANALES_FIJOS como JSON string desde una variable:
