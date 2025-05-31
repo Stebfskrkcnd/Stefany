@@ -270,27 +270,6 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await message.reply_text(
         f"✅ Publicados: {success}, ❌ Fallidos: {failed}"
     )
-        
-    for ch in channels:
-        try:
-            print(f"➡️ Enviando a canal {ch['nombre']} ({ch['id']})")
-            msg = await context.bot.send_animation(
-                chat_id=ch["id"],
-                animation=ENCABEZADO_FILEID,
-                caption=ENCABEZADO_CAPTION,
-                reply_markup=markup,
-                allow_sending_without_reply=True
-            )
-
-            ch["message_id"] = msg.message_id  # Guarda el ID del mensaje
-            success += 1
-
-        except Exception as e:
-            logging.exception(f"❌ Error publicando en canal {ch['nombre']} ({ch['id']})")
-            print("⚠️ EXCEPCIÓN:", e)
-            print("🔍 Error específico al enviar animación:", e)
-            failed += 1
-            ch["activo"] = False
 
         message = update.message or (update.callback_query.message if update.callback_query else None)
         message = cast(Message, message) if message else None
