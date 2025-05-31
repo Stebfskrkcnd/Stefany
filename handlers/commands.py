@@ -204,7 +204,7 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     for ch in channels:
         try:
-            print(f"➡️ Enviando a canal: {ch['nombre']} ({ch['id']}) con enlace: {ch['enlace']}")
+            print(f"📤 Enviando a canal: {ch['nombre']} ({ch['id']}) con enlace: {ch['enlace']}")
             msg = await context.bot.send_animation(
                 chat_id=ch["id"],
                 animation=ENCABEZADO_FILEID,
@@ -212,13 +212,11 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=markup,
                 allow_sending_without_reply=True
             )
-            ch["message_id"] = msg.message_id  # 🔴 Guarda el ID del mensaje
+            ch["message_id"] = msg.message_id
             success += 1
-
         except Exception as e:
             print(f"❌ EXCEPCIÓN al enviar a {ch['nombre']} ({ch['id']}):", e)
-            logging.exception(f"❌ Error publicando en canal {ch['nombre']} ({ch['id']})")
-            print("⚠️ EXCEPCIÓN:", e)
+            logging.exception(f"⚠️ Error publicando en canal {ch['nombre']} ({ch['id']})")
             failed += 1
             ch["activo"] = False
 
@@ -234,14 +232,6 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await notificar_admins(
                     f"⚠️ Canal {ch['nombre']} ({ch['id']}) fue castigado por fallo al enviar."
                 )
-
-            blacklist.append({
-                "id": ch["id"],
-                "nombre": ch["nombre"],
-                "desde": now.strftime("%Y-%m-%d"),
-                "hasta": hasta.strftime("%Y-%m-%d")
-            })
-            save_json("data/blacklist.json", blacklist)
 
             await notificar_admins(
                 f"⚠️ Canal {ch['nombre']} ({ch['id']}) fue castigado por remover la botonera o no permitir publicación."
