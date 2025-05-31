@@ -188,6 +188,8 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     blacklist = load_json("data/blacklist.json", [])
 
+    print("✅ Canales cargados:", json.dumps(channels, indent=2))
+    
     for ch in channels:
         try:
             print(f"➡️ Enviando a canal: {ch['nombre']} ({ch['id']}) con enlace: {ch['enlace']}")
