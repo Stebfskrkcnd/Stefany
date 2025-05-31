@@ -170,10 +170,13 @@ async def eliminar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("🪓 Callback de eliminar_canal_boton activado")
+    
     query = update.callback_query
-
-    if not query or not query.from_user:
+    if not query:
+        print("⚠️ No hay query")
         return
+
+    print("✅ Hay query")
 
     user = query.from_user
 
