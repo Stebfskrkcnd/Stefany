@@ -270,12 +270,6 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await message.reply_text(
         f"✅ Publicados: {success}, ❌ Fallidos: {failed}"
     )
-
-        message = update.message or (update.callback_query.message if update.callback_query else None)
-        message = cast(Message, message) if message else None
-
-        if message:
-            await message.reply_text(f"✅ Publicados: {success}, ❌ Fallidos: {failed}")
         save_json("data/channels.json", channels)
 
 async def ver_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
