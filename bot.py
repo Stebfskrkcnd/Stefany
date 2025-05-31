@@ -49,16 +49,19 @@ from handlers.callbacks import callback_handler
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 
 async def callback_guardar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.callback_query:
+        return
     query = update.callback_query
-    if not query:
-        return  # Previene errores si no es un callback
+    user = query.from_user
 
-    await query.answer()
+    if user is None or not autorizado(user.id):
+        return await query.answer("❌ No estás autorizado.", show_alert=True)
 
     canales = load_json("data/channels.json")
-    save_json("data/channels.json", canales)
-
-    await query.edit_message_text("✅ Cambios guardados.")
+    canales_filtrados = [c for c in canales if c.get("activo", True)]
+    save_json("data/channels.json", canales_filtrados)
+    await query.answer("✅ Cambios guardados.")
+    await query.edit_message_text("✅ Cambios guardados correctamente.")
 
 def autorizado(user_id: int) -> bool:
     return user_id in USUARIOS_AUTORIZADOS
