@@ -77,12 +77,9 @@ async def ver_channels(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if message:
         await message.reply_text(f"📁 Contenido de channels.json:\n\n{texto}")
 
-print("📌 Handler de /publicar registrado")
-print("🧪 Entró a eliminar_canal_boton")
-
 async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print("🧪 Entró al handler eliminar_canal_boton")  # <- línea de prueba
     query = update.callback_query
+    print(f"🧪 Callback recibido: {query.data}")  # <- AGREGA ESTO AQUÍ
 
     if not query:
         print("❌ query es None")
