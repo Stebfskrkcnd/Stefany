@@ -1,20 +1,24 @@
 [
   {
-    "id": "-1002449420983",
-    "nombre": "🐷🐹CANAL DE PRUEBA 2🦋🪼",
-    "enlace": "https://t.me/+f4wdweGeObsyZWMx",
-    "activo": true
+    "id": "-1001392767600",
+    "nombre": "☠️❌🚧SOBRENATURAL🚧❌☠️",
+    "enlace": "https://t.me/TerrorExtremoOficial",
+    "activo": true,
+    "message_id": 4408
   },
   {
     "id": "-1001920805141",
     "nombre": "📥 ADD MY CHANNEL +10K 📥",
     "enlace": "https://t.me/ListaHotBot?start=ar2346575658",
-    "activo": true
+    "activo": false,
+    "desde": "2025-05-31",
+    "hasta": "2025-08-29"
   },
   {
-    "id": "-1001392767600",
-    "nombre": "☠️❌🚧SOBRENATURAL🚧❌☠️",
-    "enlace": "https://t.me/TerrorExtremoOficial",
-    "activo": true
+    "id": "-1002449420983",
+    "nombre": "🐷🐹CANAL DE PRUEBA 2🦋🪼",
+    "enlace": "https://t.me/+f4wdweGeObsyZWMx",
+    "activo": true,
+    "message_id": 7
   }
 ]
