@@ -150,15 +150,23 @@ async def eliminar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     botones = []
 
     for canal in canales:
-        nombre = canal["nombre"]
-        canal_id = canal["id"]
-        botones.append([InlineKeyboardButton(text=nombre, callback_data=f"eliminar_canal_{canal_id}")])
+        botones.append([
+            InlineKeyboardButton(
+                text=f"❌ {canal['nombre']}",
+                callback_data=f"eliminar_canal_{canal['id']}"
+            )
+        ])
 
     if not botones:
         return await message.reply_text("⚠️ No hay canales para eliminar.")
 
+    # ✅ Agrega el botón "Guardar cambios"
+    botones.append([
+        InlineKeyboardButton("📝 Guardar cambios", callback_data="guardar")
+    ])
+
     reply_markup = InlineKeyboardMarkup(botones)
-    await message.reply_text("🗑️ Selecciona el canal a eliminar:", reply_markup=reply_markup)
+    await message.reply_text("🗑️ Selecciona los canales a eliminar:", reply_markup=reply_markup)
 
 async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
