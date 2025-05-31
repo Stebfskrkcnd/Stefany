@@ -103,7 +103,7 @@ async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYP
     encontrado = False
 
     for canal in canales:
-        if canal["id"] == canal_id:
+        if str(canal["id"]) == str(canal_id):
             canal["eliminar"] = True
             encontrado = True
             break
