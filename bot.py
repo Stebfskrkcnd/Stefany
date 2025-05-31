@@ -79,6 +79,7 @@ async def ver_channels(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await message.reply_text(f"📁 Contenido de channels.json:\n\n{texto}")
 
 print("📌 Handler de /publicar registrado")
+print("🧪 Entró a eliminar_canal_boton")
 
 # Registro de handlers
 app.add_handler(CommandHandler("start", start))
