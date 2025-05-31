@@ -90,6 +90,8 @@ async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYP
 
     user = query.from_user
     print(f"👤 Usuario que pulsó el botón: {user.id}")
+    print(f"👤 Verificando autorización del ID: {user.id}")
+    print(f"🔐 Lista de autorizados: {USUARIOS_AUTORIZADOS}")
 
     if not autorizado(user.id):
         return await query.answer("❌ No estás autorizado.", show_alert=True)
