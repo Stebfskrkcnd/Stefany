@@ -17,6 +17,7 @@ from utils.helpers import load_json, save_json
 from config import USUARIOS_AUTORIZADOS
 from handlers.commands import ver_blacklist
 from handlers.commands import descastigar
+from handlers.commands import eliminar_canal_boton
 
 # Configuración de logging
 logging.basicConfig(
@@ -80,6 +81,7 @@ print("📌 Handler de /publicar registrado")
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("estado", estado_bot))
 app.add_handler(CommandHandler("agregar", agregar_canal))
+app.add_handler(CommandHandler("eliminar", eliminar_canal))
 app.add_handler(CommandHandler("publicar", publicar_botonera))
 app.add_handler(CommandHandler("borrar", eliminar_botonera))
 app.add_handler(CommandHandler("autorizar", autorizar))
@@ -90,7 +92,7 @@ app.add_handler(CallbackQueryHandler(callback_guardar, pattern="^guardar$"))
 app.add_handler(CommandHandler("verchannels", ver_channels))
 app.add_handler(CommandHandler("blacklist", ver_blacklist))
 app.add_handler(CommandHandler("descastigar", descastigar))
-app.add_handler(CallbackQueryHandler(eliminar_canal, pattern="^eliminar_"))
+app.add_handler(CallbackQueryHandler(eliminar_canal_boton, pattern="^eliminar_canal_"))
 
 # Manejo de errores
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:

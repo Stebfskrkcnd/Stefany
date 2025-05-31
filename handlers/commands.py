@@ -144,17 +144,48 @@ async def eliminar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if not autorizado(user.id):
-        return
+        return await message.reply_text("❌ No estás autorizado.")
 
     canales = load_json("data/channels.json")
-    keyboard = [
-        [InlineKeyboardButton(f"{'✅' if c['activo'] else '❌'} {c['nombre']}", callback_data=f"toggle:{c['id']}")]
-        for c in canales
-    ]
+    botones = []
 
-    keyboard.append([InlineKeyboardButton("📝 Guardar cambios", callback_data="guardar")])
+    for canal in canales:
+        nombre = canal["nombre"]
+        canal_id = canal["id"]
+        botones.append([InlineKeyboardButton(text=nombre, callback_data=f"eliminar_canal_{canal_id}")])
 
-    await message.reply_text("Selecciona los canales a desactivar:", reply_markup=InlineKeyboardMarkup(keyboard))
+    if not botones:
+        return await message.reply_text("⚠️ No hay canales para eliminar.")
+
+    reply_markup = InlineKeyboardMarkup(botones)
+    await message.reply_text("🗑️ Selecciona el canal a eliminar:", reply_markup=reply_markup)
+
+async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+
+    if not query or not query.from_user:
+        return
+
+    user = query.from_user
+
+    if not autorizado(user.id):
+        return await query.answer("❌ No estás autorizado.", show_alert=True)
+
+    data = query.data
+    if not data or not data.startswith("eliminar_canal_"):
+        return await query.answer("⚠️ Acción inválida.", show_alert=True)
+
+    try:
+        canal_id = int(data.replace("eliminar_canal_", ""))
+    except ValueError:
+        return await query.answer("⚠️ ID inválido.", show_alert=True)
+
+    canales = load_json("data/channels.json")
+    canales = [c for c in canales if c["id"] != canal_id]
+    save_json("data/channels.json", canales)
+
+    await query.answer("✅ Canal eliminado.")
+    await query.edit_message_text("✅ Canal eliminado correctamente.")
 
 async def notificar_admins(msg):
     print(f"[ADMIN] {msg}")
