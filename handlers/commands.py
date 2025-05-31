@@ -169,16 +169,18 @@ async def eliminar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await message.reply_text("🗑️ Selecciona los canales a eliminar:", reply_markup=reply_markup)
 
 async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print("🪓 Callback de eliminar_canal_boton activado")
-    
+    print("🧪 Entró al handler eliminar_canal_boton")  # <- línea de prueba
     query = update.callback_query
+
     if not query:
-        print("⚠️ No hay query")
+        print("❌ query es None")
+        return
+    if not query.from_user:
+        print("❌ query.from_user es None")
         return
 
-    print("✅ Hay query")
-
     user = query.from_user
+    print(f"👤 Usuario que pulsó el botón: {user.id}")
 
     if not autorizado(user.id):
         return await query.answer("❌ No estás autorizado.", show_alert=True)
