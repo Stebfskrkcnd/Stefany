@@ -120,12 +120,12 @@ app.add_handler(CommandHandler("borrar", eliminar_botonera))
 app.add_handler(CommandHandler("autorizar", autorizar))
 app.add_handler(CommandHandler("revocar", revocar))
 app.add_handler(CommandHandler("listar", listar_autorizados))
-app.add_handler(CallbackQueryHandler(callback_handler))
-app.add_handler(CallbackQueryHandler(callback_guardar, pattern="^guardar$"))
 app.add_handler(CommandHandler("verchannels", ver_channels))
 app.add_handler(CommandHandler("blacklist", ver_blacklist))
 app.add_handler(CommandHandler("descastigar", descastigar))
 app.add_handler(CallbackQueryHandler(eliminar_canal_boton, pattern="^eliminar_canal_"))
+app.add_handler(CallbackQueryHandler(callback_guardar, pattern="^guardar$"))
+app.add_handler(CallbackQueryHandler(callback_handler))
 
 # Manejo de errores
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
