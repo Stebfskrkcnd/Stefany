@@ -11,7 +11,8 @@
     "enlace": "https://t.me/ListaHotBot?start=ar2346575658",
     "activo": false,
     "desde": "2025-05-31",
-    "hasta": "2025-08-29"
+    "hasta": "2025-08-29",
+    "eliminar": true
   },
   {
     "id": "-1002449420983",
