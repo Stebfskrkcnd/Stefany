@@ -12,6 +12,7 @@ from telegram import Message
 from telegram import InputMediaAnimation
 from telegram.ext import ContextTypes
 from utils.helpers import load_json, save_json
+from telegram.constants import ParseMode
 
 def cargar_autorizados():
     try:
@@ -273,21 +274,44 @@ async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not autorizado(user.id):
         return
 
+    success = 0
+    fallos = []
+    blacklist = load_json("data/blacklist.json", [])
     channels = load_json("data/channels.json")
 
-    success = 0
     for ch in channels:
-        if ch.get("activo") and "message_id" in ch:
-            try:
-                await context.bot.delete_message(chat_id=ch["id"], message_id=ch["message_id"])
+        try:
+            if ch.get("message_id"):
+                await context.bot.delete_message(
+                    chat_id=ch["id"],
+                    message_id=ch["message_id"]
+                )
                 success += 1
-            except:
-                pass  # Ya fue eliminada manualmente
-            ch.pop("message_id", None)  # Limpia aunque falle
+        except Exception as e:
+            motivo = "eliminaron manualmente la publicación" if "message to delete not found" in str(e) else "el bot no tenía permisos"
+            ch["activo"] = False
+            ch["desde"] = datetime.now(pytz.timezone(ZONA_HORARIA)).strftime("%Y-%m-%d")
+            ch["hasta"] = (datetime.now(pytz.timezone(ZONA_HORARIA)) + timedelta(days=90)).strftime("%Y-%m-%d")
+            ch["motivo"] = motivo
+            fallos.append(ch)
+            blacklist.append(ch)
+        finally:
+            ch.pop("message_id", None)
 
     save_json("data/channels.json", channels)
+    save_json("data/blacklist.json", blacklist)
+    await message.reply_text(
+    f"🗑️ Botonera eliminada de {success} canales.\n"
+    f"❌ Fallos: {len(fallos)} canal(es)."
+)
 
-    await message.reply_text(f"🗑 Botonera eliminada de {success} canales.")
+    if fallos:
+        detalles = "\n\n".join(
+            f"🔴 {c['nombre']} ({c['id']})\n🔗 {c['enlace']}\n❌ Motivo: {c['motivo']}"
+            for c in fallos
+        )
+        await message.reply_text(f"📋 Detalles de los fallos:\n\n{detalles}")
+    
 
 print("⚙️ Ejecutando /descastigar")
 async def descastigar(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -319,25 +343,29 @@ async def descastigar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await message.reply_text("❌ Error inesperado al intentar descastigar.")
 
 async def ver_blacklist(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    message = getattr(update, "message", None) or getattr(getattr(update, "callback_query", None), "message", None)
-    if message is None:
-        return
+    user = update.effective_user
+    message = update.effective_message
+
+    if user is None or not autorizado(user.id):
+        return await message.reply_text("❌ No estás autorizado.")
 
     blacklist = load_json("data/blacklist.json", [])
-
+    
     if not blacklist:
-        return await message.reply_text("✅ No hay canales en la blacklist.")
+        return await message.reply_text("🧹 La blacklist está vacía.")
 
-    texto = "🚫 <b>Canales castigados actualmente:</b>\n\n"
-    for c in blacklist:
+    texto = "⛔️ Canales en blacklist:\n\n"
+    for ch in blacklist:
         texto += (
-            f"🔹 <b>{c['nombre']}</b>\n"
-            f"🆔 <code>{c['id']}</code>\n"
-            f"📅 Desde: <code>{c['desde']}</code>\n"
-            f"⏳ Hasta: <code>{c['hasta']}</code>\n\n"
+            f"🔒 <b>{ch.get('nombre', 'Sin nombre')}</b>\n"
+            f"🆔 ID: <code>{ch.get('id')}</code>\n"
+            f"🔗 Enlace: {ch.get('enlace', 'N/A')}\n"
+            f"📆 Desde: {ch.get('desde', '¿?')}  Hasta: {ch.get('hasta', '¿?')}\n"
+            f"📌 Motivo: {ch.get('motivo', 'No especificado')}\n"
+            f"──────────────\n"
         )
 
-    await message.reply_text(texto, parse_mode="HTML")
+    await message.reply_text(texto, parse_mode=ParseMode.HTML)
 
 async def autorizar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
