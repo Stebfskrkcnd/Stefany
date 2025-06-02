@@ -142,6 +142,7 @@ async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await message.reply_text(f"❌ Error en agregar: {e}")
 
 async def ver_canales(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print("✅ Comando /ver_canales recibido")
     user = update.effective_user
     if user is None or user.id not in USUARIOS_AUTORIZADOS:
         if update.message:
