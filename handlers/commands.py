@@ -154,37 +154,42 @@ async def ver_canales(update: Update, context: ContextTypes.DEFAULT_TYPE):
     canales_activos = [c for c in canales if c.get("activo", True)]
 
     if not canales_activos:
-        if update.message:
-            await update.message.reply_text("❌No hay canales activos actualmente.")
+        await update.message.reply_text("No hay canales activos actualmente.") # type: ignore
         return
 
+    def dividir_lista(lista, n):
+        for i in range(0, len(lista), n):
+            yield lista[i:i + n]
+
     total_suscriptores = 0
-    mensaje = "📝 <b>Lista de canales participando:</b>\n\n"
+    bloques = list(dividir_lista(canales_activos, 10))
 
-    for canal in canales_activos:
-        canal_id = canal["id"]
-        nombre = canal["nombre"]
-        enlace = canal["enlace"]
+    for bloque in bloques:
+        mensaje = "📢 <b>Lista de canales participando:</b>\n\n"
+        for canal in bloque:
+            canal_id = canal["id"]
+            nombre = canal["nombre"]
+            enlace = canal["enlace"]
 
-        try:
-            chat = await context.bot.get_chat(canal_id)
-            subs = await context.bot.get_chat_member_count(canal_id)
-        except TelegramError:
-            subs = "Desconocido"
+            try:
+                subs = await context.bot.get_chat_member_count(canal_id)
+            except TelegramError:
+                subs = "Desconocido"
 
-        mensaje += f"<b>📌 Nombre:</b> {nombre}\n"
-        mensaje += f"<b>🆔 ID:</b> {canal_id}\n"
-        mensaje += f"<b>🔗 Enlace:</b> {enlace}\n"
-        mensaje += f"<b>👥 Subscriptores:</b> {subs}\n\n"
+            mensaje += f"<b>📌 Nombre:</b> {nombre}\n"
+            mensaje += f"<b>🆔 ID:</b> {canal_id}\n"
+            mensaje += f"<b>🔗 Enlace:</b> {enlace}\n"
+            mensaje += f"<b>👥 Subscriptores:</b> {subs}\n\n"
 
-        if isinstance(subs, int):
-            total_suscriptores += subs
+            if isinstance(subs, int):
+                total_suscriptores += subs
 
-    mensaje += f"🔢 <b>Total participando:</b> {len(canales_activos)} canales\n"
-    mensaje += f"👥 <b>Total subscriptores:</b> {total_suscriptores}"
+        await update.message.reply_text(mensaje, parse_mode="HTML", disable_web_page_preview=True) # type: ignore
 
-    if update.message:
-        await update.message.reply_text(mensaje, parse_mode="HTML", disable_web_page_preview=True)
+    # Mensaje final con totales
+    resumen = f"🔢 <b>Total participando:</b> {len(canales_activos)} canales\n"
+    resumen += f"👥 <b>Total subscriptores:</b> {total_suscriptores}"
+    await update.message.reply_text(resumen, parse_mode="HTML", disable_web_page_preview=True) # type: ignore
 
 async def eliminar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
