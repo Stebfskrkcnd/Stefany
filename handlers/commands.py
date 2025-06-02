@@ -145,7 +145,7 @@ async def ver_canales(update: Update, context: ContextTypes.DEFAULT_TYPE):
     with open("channels.json", "r", encoding="utf-8") as f:
         canales = json.load(f)
 
-    canales_activos = [c for c in canales if not c.get("eliminar", False)]
+    canales_activos = [c for c in canales if c.get("activo", True)]
     
     if not canales_activos:
         await update.message.reply_text("No hay canales activos actualmente.") # type: ignore

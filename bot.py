@@ -19,6 +19,7 @@ from utils.helpers import load_json, save_json
 from config import USUARIOS_AUTORIZADOS 
 from handlers.commands import ver_blacklist
 from handlers.commands import descastigar 
+from handlers.commands import ver_canales
 
 # Configuración de logging
 logging.basicConfig(
@@ -70,18 +71,6 @@ async def callback_guardar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def autorizado(user_id: int) -> bool:
     return user_id in USUARIOS_AUTORIZADOS
 
-async def ver_channels(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    message = update.message or update.effective_message
-
-    if user is None or not autorizado(user.id):
-        return
-
-    canales = load_json("data/channels.json")
-    texto = json.dumps(canales, indent=2, ensure_ascii=False)
-    if message:
-        await message.reply_text(f"📁 Contenido de channels.json:\n\n{texto}")
-
 async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     print(f"✏️ Callback recibido: {query.data}") # type: ignore
@@ -131,7 +120,7 @@ app.add_handler(CommandHandler("borrar", eliminar_botonera))
 app.add_handler(CommandHandler("autorizar", autorizar))
 app.add_handler(CommandHandler("revocar", revocar))
 app.add_handler(CommandHandler("listar", listar_autorizados))
-app.add_handler(CommandHandler("verchannels", ver_channels))
+app.add_handler(CommandHandler("vercanales", ver_canales))
 app.add_handler(CommandHandler("blacklist", ver_blacklist))
 app.add_handler(CommandHandler("descastigar", descastigar))
 app.add_handler(CallbackQueryHandler(eliminar_canal_boton, pattern="^eliminar_canal_"))
