@@ -3,6 +3,8 @@ from datetime import datetime
 import pytz
 import random
 import logging
+import telegram
+import requests
 from config import ENCABEZADO_FILEID, ENCABEZADO_CAPTION, PATH_BLACKLIST_JSON # type: ignore
 from typing import cast
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -11,6 +13,7 @@ from telegram import Update
 from telegram import Message
 from telegram import InputMediaAnimation
 from telegram.ext import ContextTypes
+from telegram.error import TelegramError
 from utils.helpers import load_json, save_json
 from telegram.constants import ParseMode
 
@@ -136,6 +139,44 @@ async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     except Exception as e:
         await message.reply_text(f"❌ Error en agregar: {e}")
+
+async def ver_canales(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Carga los canales
+    with open("channels.json", "r", encoding="utf-8") as f:
+        canales = json.load(f)
+
+    canales_activos = [c for c in canales if not c.get("eliminar", False)]
+    
+    if not canales_activos:
+        await update.message.reply_text("No hay canales activos actualmente.") # type: ignore
+        return
+
+    total_suscriptores = 0
+    mensaje = "📢 <b>Lista de canales participando:</b>\n\n"
+
+    for canal in canales_activos:
+        canal_id = canal["id"]
+        nombre = canal["nombre"]
+        enlace = canal["enlace"]
+
+        try:
+            chat = await context.bot.get_chat(canal_id)
+            subs = await context.bot.get_chat_member_count(canal_id)
+        except TelegramError:
+            subs = "Desconocido"
+
+        mensaje += f"<b>📌 Nombre:</b> {nombre}\n"
+        mensaje += f"<b>🆔 ID:</b> {canal_id}\n"
+        mensaje += f"<b>🔗 Enlace:</b> {enlace}\n"
+        mensaje += f"<b>👥 Subscriptores:</b> {subs}\n\n"
+
+        if isinstance(subs, int):
+            total_suscriptores += subs
+
+    mensaje += f"<b>✅ Total participando:</b> {len(canales_activos)} canales\n"
+    mensaje += f"<b>👥 Total subscriptores:</b> {total_suscriptores}"
+
+    await update.message.reply_text(mensaje, parse_mode="HTML", disable_web_page_preview=True) # type: ignore
 
 async def eliminar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
