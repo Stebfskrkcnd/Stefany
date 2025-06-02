@@ -347,12 +347,12 @@ async def ver_blacklist(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
 
     if user is None or not autorizado(user.id):
-        return await message.reply_text("❌ No estás autorizado.")
+        return await message.reply_text("❌ No estás autorizado.") # type: ignore
 
     blacklist = load_json("data/blacklist.json", [])
     
     if not blacklist:
-        return await message.reply_text("🧹 La blacklist está vacía.")
+        return await message.reply_text("🧹 La blacklist está vacía.") # type: ignore
 
     texto = "⛔️ Canales en blacklist:\n\n"
     for ch in blacklist:
@@ -365,7 +365,7 @@ async def ver_blacklist(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"──────────────\n"
         )
 
-    await message.reply_text(texto, parse_mode=ParseMode.HTML)
+    await message.reply_text(texto, parse_mode=ParseMode.HTML) # type: ignore
 
 async def autorizar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user

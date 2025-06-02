@@ -1,6 +1,8 @@
 print("🚀 BOT INICIADO DESDE Railway")
 import os
 import json
+import requests
+import telegram
 from telegram import Update
 from telegram.ext import ContextTypes
 import logging
@@ -118,6 +120,44 @@ async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYP
     caption="📝 Cambios pendientes. Pulsa 'Guardar cambios' para aplicar."
 )
 
+async def ver_canales(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Carga los canales
+    with open("channels.json", "r", encoding="utf-8") as f:
+        canales = json.load(f)
+
+    canales_activos = [c for c in canales if not c.get("eliminar", False)]
+    
+    if not canales_activos:
+        await update.message.reply_text("No hay canales activos actualmente.") # type: ignore
+        return
+
+    total_suscriptores = 0
+    mensaje = "📢 <b>Lista de canales participando:</b>\n\n"
+
+    for canal in canales_activos:
+        canal_id = canal["id"]
+        nombre = canal["nombre"]
+        enlace = canal["enlace"]
+
+        try:
+            chat = await context.bot.get_chat(canal_id)
+            subs = await context.bot.get_chat_member_count(canal_id)
+        except telegram.error.TelegramError:
+            subs = "Desconocido"
+
+        mensaje += f"<b>📌 Nombre:</b> {nombre}\n"
+        mensaje += f"<b>🆔 ID:</b> {canal_id}\n"
+        mensaje += f"<b>🔗 Enlace:</b> {enlace}\n"
+        mensaje += f"<b>👥 Subscriptores:</b> {subs}\n\n"
+
+        if isinstance(subs, int):
+            total_suscriptores += subs
+
+    mensaje += f"<b>✅ Total participando:</b> {len(canales_activos)} canales\n"
+    mensaje += f"<b>👥 Total subscriptores:</b> {total_suscriptores}"
+
+    await update.message.reply_text(mensaje, parse_mode="HTML", disable_web_page_preview=True) # type: ignore
+
 # Registro de handlers
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("estado", estado_bot))
@@ -134,6 +174,7 @@ app.add_handler(CommandHandler("descastigar", descastigar))
 app.add_handler(CallbackQueryHandler(eliminar_canal_boton, pattern="^eliminar_canal_"))
 app.add_handler(CallbackQueryHandler(callback_guardar, pattern="^guardar$"))
 app.add_handler(CallbackQueryHandler(callback_handler))
+app.add_handler(CommandHandler("ver_canales", ver_canales))
 
 # Manejo de errores
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
