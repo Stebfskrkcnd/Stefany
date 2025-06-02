@@ -54,7 +54,8 @@
     "activo": false,
     "desde": "2025-06-02",
     "hasta": "2025-08-31",
-    "motivo": "el bot no tenía permisos"
+    "motivo": "el bot no tenía permisos",
+    "eliminar": true
   },
   {
     "id": -1001481571828,
