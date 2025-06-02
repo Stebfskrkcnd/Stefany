@@ -149,7 +149,7 @@ async def ver_canales(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("🚫 No estás autorizad@ para usar este comando.")
         return
 
-    with open("channels.json", "r", encoding="utf-8") as f:
+    with open("data/channels.json", "r", encoding="utf-8") as f:
         canales = json.load(f)
 
     canales_activos = [c for c in canales if c.get("activo", True)]
