@@ -112,9 +112,11 @@ async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYP
 
 async def file_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.message
-
     if message is None:
-            return
+        return
+
+    print(message)  # 👈 añade esto para ver en Railway qué tipo llega
+
     if message.animation:
         await message.reply_text(f"file_id del GIF: `{message.animation.file_id}`", parse_mode="Markdown")
     elif message.photo:
