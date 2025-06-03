@@ -110,6 +110,22 @@ async def eliminar_canal_boton(update: Update, context: ContextTypes.DEFAULT_TYP
     caption="📝 Cambios pendientes. Pulsa 'Guardar cambios' para aplicar."
 )
 
+async def file_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    message = update.message
+
+    if message is None:
+            return
+    if message.animation:
+        await message.reply_text(f"file_id del GIF: `{message.animation.file_id}`", parse_mode="Markdown")
+    elif message.photo:
+        await message.reply_text(f"file_id de la FOTO: `{message.photo[-1].file_id}`", parse_mode="Markdown")
+    elif message.video:
+        await message.reply_text(f"file_id del VIDEO: `{message.video.file_id}`", parse_mode="Markdown")
+    elif message.document:
+        await message.reply_text(f"file_id del DOCUMENTO: `{message.document.file_id}`", parse_mode="Markdown")
+    else:
+        await message.reply_text("No se detectó ningún archivo multimedia.")
+
 # Registro de handlers
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("estado", estado_bot))
@@ -127,6 +143,7 @@ app.add_handler(CallbackQueryHandler(eliminar_canal_boton, pattern="^eliminar_ca
 app.add_handler(CallbackQueryHandler(callback_guardar, pattern="^guardar$"))
 app.add_handler(CallbackQueryHandler(callback_handler))
 app.add_handler(CommandHandler("ver_canales", ver_canales))
+app.add_handler(MessageHandler(filters.ALL, file_id_handler))
 
 # Manejo de errores
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
