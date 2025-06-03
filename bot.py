@@ -115,16 +115,16 @@ async def file_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if message is None:
         return
 
-    print(message)  # 👈 añade esto para ver en Railway qué tipo llega
+    print(message)  # para ver en logs cómo viene el archivo
 
     if message.animation:
-        await message.reply_text(f"file_id del GIF: `{message.animation.file_id}`", parse_mode="Markdown")
+        await message.reply_text(f"file_id del GIF: {message.animation.file_id}")
     elif message.photo:
-        await message.reply_text(f"file_id de la FOTO: `{message.photo[-1].file_id}`", parse_mode="Markdown")
+        await message.reply_text(f"file_id de la FOTO: {message.photo[-1].file_id}")
     elif message.video:
-        await message.reply_text(f"file_id del VIDEO: `{message.video.file_id}`", parse_mode="Markdown")
+        await message.reply_text(f"file_id del VIDEO: {message.video.file_id}")
     elif message.document:
-        await message.reply_text(f"file_id del DOCUMENTO: `{message.document.file_id}`", parse_mode="Markdown")
+        await message.reply_text(f"file_id del DOCUMENTO: {message.document.file_id}")
     else:
         await message.reply_text("No se detectó ningún archivo multimedia.")
 
