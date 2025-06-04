@@ -70,3 +70,42 @@ def get_encabezado():
         "caption": os.getenv("ENCABEZADO_CAPTION", "")
     }
     
+def limpiar_canales_inactivos():
+    canales = load_json("data/channels.json")
+    canales_filtrados = [canal for canal in canales if canal.get("activo", True)]
+    save_json("data/channels.json", canales_filtrados)
+
+def git_push(mensaje_commit="Cambios desde el bot"):
+    GIT_TOKEN = os.getenv("GIT_TOKEN", "")
+    REPO = os.getenv("GIT_REPO", "")
+    USER = os.getenv("GIT_USER", "")
+    
+    if not GIT_TOKEN or not REPO or not USER:
+        logging.error("⚠️ Faltan variables de entorno para el push a GitHub.")
+        return
+
+    headers = {
+        "Authorization": f"Bearer {GIT_TOKEN}",
+        "Accept": "application/vnd.github+json"
+    }
+
+    for archivo in ["channels.json", "blacklist.json"]:
+        ruta = f"data/{archivo}"
+        with open(ruta, "r", encoding="utf-8") as f:
+            contenido = f.read()
+
+        api_url = f"https://api.github.com/repos/{USER}/{REPO}/contents/data/{archivo}"
+        payload = {
+            "message": mensaje_commit,
+            "content": contenido.encode("utf-8").decode("utf-8"),
+            "branch": "main"
+        }
+
+        try:
+            r = requests.put(api_url, headers=headers, json=payload)
+            if r.ok:
+                logging.info(f"✅ Push a GitHub de {archivo} exitoso")
+            else:
+                logging.error(f"❌ Error al hacer push de {archivo}: {r.text}")
+        except Exception as e:
+            logging.error(f"❌ Excepción en el push: {e}")

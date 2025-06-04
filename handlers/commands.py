@@ -17,6 +17,8 @@ from telegram.ext import ContextTypes
 from telegram.error import TelegramError
 from utils.helpers import load_json, save_json
 from telegram.constants import ParseMode
+from utils.helpers import limpiar_canales_inactivos
+from utils.helpers import git_push
 
 def cargar_autorizados():
     try:
@@ -292,6 +294,9 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await notificar_admins(
                 f"⚠️ Canal {ch['nombre']} ({ch['id']}) fue castigado por remover la botonera o no permitir publicación."
         )
+        limpiar_canales_inactivos()
+        git_push("Auto limpieza: canales inactivos eliminados tras castigo")
+
     if update.message:
         message = update.message #✅ Esta linea lo arregla
         await message.reply_text(
