@@ -95,9 +95,12 @@ def git_push(mensaje_commit="Cambios desde el bot", archivos=["channels.json", "
             contenido = f.read()
 
         api_url = f"https://api.github.com/repos/{USER}/{REPO}/contents/data/{archivo}"
+
+        import base64
+
         payload = {
             "message": mensaje_commit,
-            "content": contenido.encode("utf-8").decode("utf-8"),
+            "content": base64.b64encode(contenido.encode("utf-8")).decode("utf-8"),
             "branch": "main"
         }
 
