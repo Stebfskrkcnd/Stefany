@@ -20,6 +20,8 @@ from telegram.constants import ParseMode
 from utils.helpers import limpiar_canales_inactivos
 from utils.helpers import git_push
 
+activo = True # estado inicial del bot
+
 def cargar_autorizados():
     try:
         with open("data/autorizados.json", "r", encoding="utf-8") as f:
@@ -259,6 +261,11 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     blacklist = load_json("data/blacklist.json", [])
 
     print("✅ Canales cargados:", json.dumps(channels, indent=2))
+
+    global activo
+    if not activo:
+        await update.message.reply_text("⚠️ El bot está detenido. Usa /start para activarlo.") # type: ignore
+        return
 
     for ch in channels:
         try:

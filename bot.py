@@ -21,6 +21,9 @@ from handlers.commands import ver_blacklist
 from handlers.commands import descastigar 
 from handlers.commands import ver_canales
 
+# Variable global para saber si el bot está activo
+activo = True
+
 # Configuración de logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -128,8 +131,20 @@ async def file_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await message.reply_text("No se detectó ningún archivo multimedia.")
 
+async def detener_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global activo
+    activo = False
+    await update.message.reply_text("🛑 Bot detenido. No se realizarán acciones hasta nuevo aviso.") # type: ignore
+
+async def iniciar_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global activo
+    activo = True
+    await update.message.reply_text("✅ Bot activado y listo para usarse.") # type: ignore
+    
 # Registro de handlers
-app.add_handler(CommandHandler("start", start))
+
+app.add_handler(CommandHandler("start", iniciar_bot))
+app.add_handler(CommandHandler("stop", detener_bot))
 app.add_handler(CommandHandler("estado", estado_bot))
 app.add_handler(CommandHandler("agregar", agregar_canal))
 app.add_handler(CommandHandler("eliminar", eliminar_canal))
