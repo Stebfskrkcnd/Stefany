@@ -75,7 +75,7 @@ def limpiar_canales_inactivos():
     canales_filtrados = [canal for canal in canales if canal.get("activo", True)]
     save_json("data/channels.json", canales_filtrados)
 
-def git_push(mensaje_commit="Cambios desde el bot"):
+def git_push(mensaje_commit="Cambios desde el bot", archivos=["channels.json", "blacklist.json"]):
     GIT_TOKEN = os.getenv("GIT_TOKEN", "")
     REPO = os.getenv("GIT_REPO", "")
     USER = os.getenv("GIT_USER", "")
@@ -89,7 +89,7 @@ def git_push(mensaje_commit="Cambios desde el bot"):
         "Accept": "application/vnd.github+json"
     }
 
-    for archivo in ["channels.json", "blacklist.json"]:
+    for archivo in archivos:
         ruta = f"data/{archivo}"
         with open(ruta, "r", encoding="utf-8") as f:
             contenido = f.read()

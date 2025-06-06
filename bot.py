@@ -145,15 +145,18 @@ async def file_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def detener_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global activo
     activo = False
+    print("💾 Estado guardado:", activo)
     guardar_estado(activo)
-    git_push("🔴 Bot detenido manualmente")
+    print("➡️ Ejecutando git_push()")
+    git_push("🔴 Bot detenido manualmente", archivos=["estado.json"])
+    print("✅ git_push() ejecutado")
     await update.message.reply_text("🛑 Bot detenido. No se realizarán acciones hasta nuevo aviso.") # type: ignore
 
 async def iniciar_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global activo
     activo = True
     guardar_estado(activo)
-    git_push("🟢 Bot activado manualmente")
+    git_push("🟢 Bot activado manualmente", archivos=["estado.json"])
     await update.message.reply_text("✅ Bot activado y listo para usarse.") # type: ignore
     
 # Registro de handlers
