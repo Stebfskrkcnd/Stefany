@@ -289,11 +289,6 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     print("✅ Canales cargados:", json.dumps(channels, indent=2))
 
-    global activo
-    if not activo:
-        await update.message.reply_text("⚠️ El bot está detenido. Usa /start para activarlo.") # type: ignore
-        return
-
     for ch in channels:
         try:
             print(f"📤 Enviando a canal: {ch['nombre']} ({ch['id']}) con enlace: {ch['enlace']}")
