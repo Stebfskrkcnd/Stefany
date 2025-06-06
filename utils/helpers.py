@@ -4,6 +4,7 @@ import subprocess
 import logging
 import traceback
 import json, os, requests, logging
+import base64
 
 GITHUB_API = "https://api.github.com"
 REPO = "Stebfskrkcnd/Stefany"  # tu repo en GitHub
@@ -79,9 +80,9 @@ def git_push(mensaje_commit="Cambios desde el bot", archivos=["channels.json", "
     GIT_TOKEN = os.getenv("GIT_TOKEN", "")
     REPO = os.getenv("GIT_REPO", "")
     USER = os.getenv("GIT_USER", "")
-    
+
     if not GIT_TOKEN or not REPO or not USER:
-        logging.error("⚠️ Faltan variables de entorno para el push a GitHub.")
+        logging.error("⚠️  Faltan variables de entorno para el push a GitHub.")
         return
 
     headers = {
@@ -94,21 +95,30 @@ def git_push(mensaje_commit="Cambios desde el bot", archivos=["channels.json", "
         with open(ruta, "r", encoding="utf-8") as f:
             contenido = f.read()
 
+        contenido_base64 = base64.b64encode(contenido.encode("utf-8")).decode("utf-8")
         api_url = f"https://api.github.com/repos/{USER}/{REPO}/contents/data/{archivo}"
 
-        import base64
+        # Obtener SHA actual
+        r_get = requests.get(api_url, headers=headers)
+        if r_get.ok:
+            sha = r_get.json().get("sha")
+        else:
+            sha = None  # Si el archivo no existe, se hace sin SHA
 
         payload = {
             "message": mensaje_commit,
-            "content": base64.b64encode(contenido.encode("utf-8")).decode("utf-8"),
+            "content": contenido_base64,
             "branch": "main"
         }
 
+        if sha:
+            payload["sha"] = sha
+
         try:
-            r = requests.put(api_url, headers=headers, json=payload)
-            if r.ok:
+            r_put = requests.put(api_url, headers=headers, json=payload)
+            if r_put.ok:
                 logging.info(f"✅ Push a GitHub de {archivo} exitoso")
             else:
-                logging.error(f"❌ Error al hacer push de {archivo}: {r.text}")
+                logging.error(f"❌ Error al hacer push de {archivo}: {r_put.text}")
         except Exception as e:
-            logging.error(f"❌ Excepción en el push: {e}")
+            logging.error(f"❌ Excepción en el push de {archivo}: {e}")
