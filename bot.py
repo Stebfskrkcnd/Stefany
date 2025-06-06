@@ -21,6 +21,19 @@ from handlers.commands import ver_blacklist
 from handlers.commands import descastigar 
 from handlers.commands import ver_canales
 
+def cargar_estado():
+    try:
+        with open("data/estado.json", "r", encoding="utf-8") as f:
+            return json.load(f).get("activo", True)
+    except FileNotFoundError:
+        return True  # si no existe, lo pone activo por defecto
+
+def guardar_estado(valor):
+    with open("data/estado.json", "w", encoding="utf-8") as f:
+        json.dump({"activo": valor}, f, indent=2)
+
+activo = cargar_estado()
+
 # Variable global para saber si el bot está activo
 activo = True
 
@@ -134,11 +147,13 @@ async def file_id_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def detener_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global activo
     activo = False
+    guardar_estado(activo)
     await update.message.reply_text("🛑 Bot detenido. No se realizarán acciones hasta nuevo aviso.") # type: ignore
 
 async def iniciar_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global activo
     activo = True
+    guardar_estado(activo)
     await update.message.reply_text("✅ Bot activado y listo para usarse.") # type: ignore
     
 # Registro de handlers

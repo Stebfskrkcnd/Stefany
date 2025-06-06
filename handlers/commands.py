@@ -49,6 +49,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return  # No se puede procesar sin usuario o mensaje
 
     global activo
+    activo = True
     if not activo:
         await update.message.reply_text("⚠️ El bot está detenido. Usa /start para activarlo.") # type: ignore
         return
