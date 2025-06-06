@@ -75,7 +75,7 @@ def limpiar_canales_inactivos():
     canales_filtrados = [canal for canal in canales if canal.get("activo", True)]
     save_json("data/channels.json", canales_filtrados)
 
-def git_push(mensaje_commit="Cambios desde el bot", archivos=["channels.json", "blacklist.json"]):
+def git_push(mensaje_commit="Cambios desde el bot", archivos=["channels.json", "blacklist.json", "estado.json"]):
     GIT_TOKEN = os.getenv("GIT_TOKEN", "")
     REPO = os.getenv("GIT_REPO", "")
     USER = os.getenv("GIT_USER", "")
