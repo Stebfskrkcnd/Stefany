@@ -45,9 +45,13 @@ def autorizado(user_id):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     message = update.effective_message
-
     if user is None or message is None:
         return  # No se puede procesar sin usuario o mensaje
+
+    global activo
+    if not activo:
+        await update.message.reply_text("⚠️ El bot está detenido. Usa /start para activarlo.") # type: ignore
+        return
 
     user_id = user.id
 
@@ -61,10 +65,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def estado_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     message = update.effective_message
-
     if user is None or message is None:
         return
 
+    global activo
+    if not activo:
+        await update.message.reply_text("⚠️ El bot está detenido. Usa /start para activarlo.") # type: ignore
+        return
+    
     if not autorizado(user.id):
         return
 
@@ -94,10 +102,14 @@ async def estado_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def agregar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     message = update.effective_message  # Esto sí garantiza que no sea None
-
     if user is None or message is None:
         return
 
+    global activo
+    if not activo:
+        await update.message.reply_text("⚠️ El bot está detenido. Usa /start para activarlo.") # type: ignore
+        return
+    
     if not autorizado(user.id):
         return
 
@@ -153,6 +165,11 @@ async def ver_canales(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("🚫 No estás autorizad@ para usar este comando.")
         return
 
+    global activo
+    if not activo:
+        await update.message.reply_text("⚠️ El bot está detenido. Usa /start para activarlo.") # type: ignore
+        return
+    
     with open("data/channels.json", "r", encoding="utf-8") as f:
         canales = json.load(f)
 
@@ -199,10 +216,14 @@ async def ver_canales(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def eliminar_canal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     message = update.effective_message
-
     if user is None or message is None:
         return
 
+    global activo
+    if not activo:
+        await update.message.reply_text("⚠️ El bot está detenido. Usa /start para activarlo.") # type: ignore
+        return
+    
     if not autorizado(user.id):
         return await message.reply_text("❌ No estás autorizado.")
 
@@ -234,6 +255,11 @@ async def notificar_admins(msg):
 async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
 
+    global activo
+    if not activo:
+        await update.message.reply_text("⚠️ El bot está detenido. Usa /start para activarlo.") # type: ignore
+        return
+    
     print(f"✅ Entró a publicar_botonera a las {datetime.now().strftime('%H:%M:%S')}")
     import uuid
     print("🆔 ID de instancia:", uuid.uuid4())
@@ -314,10 +340,14 @@ async def publicar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def ver_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     message = update.effective_message
-
     if user is None or message is None:
         return
 
+    global activo
+    if not activo:
+        await update.message.reply_text("⚠️ El bot está detenido. Usa /start para activarlo.") # type: ignore
+        return
+    
     if not autorizado(user.id):
         return
 
@@ -334,10 +364,14 @@ async def ver_encabezado(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     message = update.effective_message
-
     if user is None or message is None:
         return
 
+    global activo
+    if not activo:
+        await update.message.reply_text("⚠️ El bot está detenido. Usa /start para activarlo.") # type: ignore
+        return
+    
     if not autorizado(user.id):
         return
 
@@ -386,6 +420,11 @@ async def descastigar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not isinstance(message, Message):
         return
     
+    global activo
+    if not activo:
+        await update.message.reply_text("⚠️ El bot está detenido. Usa /start para activarlo.") # type: ignore
+        return
+    
     user = update.effective_user
     if user is None or user.id not in USUARIOS_AUTORIZADOS:
         return await message.reply_text("❌ No estás autorizado.")
@@ -413,6 +452,11 @@ async def ver_blacklist(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     message = update.effective_message
 
+    global activo
+    if not activo:
+        await update.message.reply_text("⚠️ El bot está detenido. Usa /start para activarlo.") # type: ignore
+        return
+    
     if user is None or not autorizado(user.id):
         return await message.reply_text("❌ No estás autorizado.") # type: ignore
 
@@ -437,10 +481,14 @@ async def ver_blacklist(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def autorizar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     message = update.effective_message
-
     if user is None or message is None:
         return
 
+    global activo
+    if not activo:
+        await update.message.reply_text("⚠️ El bot está detenido. Usa /start para activarlo.") # type: ignore
+        return
+    
     user_id = user.id
     if not autorizado(user_id):
         return
@@ -472,10 +520,14 @@ async def autorizar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def revocar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     message = update.effective_message
-
     if user is None or message is None:
         return
 
+    global activo
+    if not activo:
+        await update.message.reply_text("⚠️ El bot está detenido. Usa /start para activarlo.") # type: ignore
+        return
+    
     if not autorizado(user.id):
         return
 
@@ -504,6 +556,11 @@ async def listar_autorizados(update: Update, context: ContextTypes.DEFAULT_TYPE)
     user = update.effective_user
     message = update.effective_message
 
+    global activo
+    if not activo:
+        await update.message.reply_text("⚠️ El bot está detenido. Usa /start para activarlo.") # type: ignore
+        return
+    
     if user is None or message is None:
         return
 
