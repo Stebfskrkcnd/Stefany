@@ -6,6 +6,7 @@ import telegram
 from telegram import Update
 from telegram.ext import ContextTypes
 import logging
+from utils.helpers import git_push
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -33,9 +34,6 @@ def guardar_estado(valor):
         json.dump({"activo": valor}, f, indent=2)
 
 activo = cargar_estado()
-
-# Variable global para saber si el bot está activo
-activo = True
 
 # Configuración de logging
 logging.basicConfig(
@@ -148,12 +146,14 @@ async def detener_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global activo
     activo = False
     guardar_estado(activo)
+    git_push("🔴 Bot detenido manualmente")
     await update.message.reply_text("🛑 Bot detenido. No se realizarán acciones hasta nuevo aviso.") # type: ignore
 
 async def iniciar_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global activo
     activo = True
     guardar_estado(activo)
+    git_push("🟢 Bot activado manualmente")
     await update.message.reply_text("✅ Bot activado y listo para usarse.") # type: ignore
     
 # Registro de handlers
