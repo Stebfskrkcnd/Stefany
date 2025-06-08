@@ -383,6 +383,7 @@ async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     chat_id=ch["id"],
                     message_id=ch["message_id"]
                 )
+                ch.pop("message_id", None)  # ✅ solo si se eliminó bien
                 success += 1
         except Exception as e:
             motivo = "eliminaron manualmente la publicación" if "message to delete not found" in str(e) else "el bot no tenía permisos"
@@ -392,8 +393,6 @@ async def eliminar_botonera(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ch["motivo"] = motivo
             fallos.append(ch)
             blacklist.append(ch)
-        finally:
-            ch.pop("message_id", None)
 
     save_json("data/channels.json", channels)
     save_json("data/blacklist.json", blacklist)
