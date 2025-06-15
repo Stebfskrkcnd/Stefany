@@ -73,7 +73,7 @@ def get_encabezado():
     
 def limpiar_canales_inactivos():
     canales = load_json("data/channels.json")
-    canales_filtrados = [canal for canal in canales if canal.get("activo", True)]
+    canales_filtrados = [canal for canal in canales if canal.get("activo") is not False]
     save_json("data/channels.json", canales_filtrados)
 
 def git_push(mensaje_commit="Cambios desde el bot", archivos=["channels.json", "blacklist.json", "estado.json"]):
